@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -13,11 +14,20 @@ public class loginController extends Activity {
     private EditText password;
     private Button loginButton;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setupUI();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.overridePendingTransition(R.anim.push_right_enter, R.anim.push_right_exit);
     }
 
     // Attempts to login user.
