@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">PeerSplitAndroidApplication</string>
+
+
+    <string name="textField_username_hint">username</string>
+    <string name="textField_password_hint">password</string>
+    <string name="textField_passwordAgain_hint">password again</string>
+    <string name="textField_email_hint">email</string>
+    <string name="button_needAnAccount">Need An Account?</string>
+    <string name="buttton_gotAnAccount">Got An Account?</string>
+    <string name="signup">SIGN UP</string>
+
+</resources>
