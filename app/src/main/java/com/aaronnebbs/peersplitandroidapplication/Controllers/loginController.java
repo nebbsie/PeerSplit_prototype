@@ -1,4 +1,4 @@
-package com.aaronnebbs.peersplitandroidapplication;
+package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.aaronnebbs.peersplitandroidapplication.R;
 
 public class loginController extends Activity {
 
@@ -23,10 +25,10 @@ public class loginController extends Activity {
         setupUI();
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
+        // Start the animation
         this.overridePendingTransition(R.anim.push_right_enter, R.anim.push_right_exit);
     }
 

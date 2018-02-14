@@ -1,4 +1,4 @@
-package com.aaronnebbs.peersplitandroidapplication;
+package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,16 +8,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.aaronnebbs.peersplitandroidapplication.R;
 
 public class registerController extends Activity {
-
     private EditText username;
     private EditText email;
     private EditText password;
     private EditText passwordAgain;
     private Button goBack;
     private TextView gotAccount;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,14 +29,17 @@ public class registerController extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Start the animation
         this.overridePendingTransition(R.anim.push_left_enter, R.anim.push_left_exit);
     }
 
-    public void gotAccount(){
+    // Goes back to the login screen
+    public void goToLoginScreen(){
         Intent i = new Intent(getApplication(), loginController.class);
         startActivity(i);
     }
 
+    // Setup the UI elements
     private void setupUI(){
         username = findViewById(R.id.editText_usernameReg);
         email = findViewById(R.id.editText_emailReg);
@@ -49,15 +51,13 @@ public class registerController extends Activity {
         gotAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gotAccount();
+                goToLoginScreen();
             }
         });
-
         goBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplication(), loginController.class);
-                startActivity(i);
+                goToLoginScreen();
             }
         });
     }
