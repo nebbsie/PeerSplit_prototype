@@ -9,5 +9,10 @@
     <string name="button_needAnAccount">Need An Account?</string>
     <string name="buttton_gotAnAccount">Got An Account?</string>
     <string name="signup">SIGN UP</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_overview">Overview</string>
+    <string name="nav_upload">Upload</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_settings">Settings</string>
 
 </resources>

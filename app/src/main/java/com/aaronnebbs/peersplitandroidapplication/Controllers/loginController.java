@@ -34,7 +34,8 @@ public class loginController extends Activity {
 
     // Attempts to login user.
     private void attemptLogin(){
-
+        Intent i = new Intent(getApplication(), homeController.class);
+        startActivity(i);
     }
 
     // Links to the register page.

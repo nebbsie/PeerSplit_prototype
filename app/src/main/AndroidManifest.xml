@@ -16,7 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Controllers.registerController"></activity>
+        <activity android:name=".Controllers.registerController" />
+        <activity android:name=".Controllers.homeController"></activity>
     </application>
 
 </manifest>
