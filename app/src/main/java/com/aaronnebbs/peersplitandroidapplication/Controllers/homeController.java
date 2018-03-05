@@ -54,14 +54,11 @@ public class homeController extends FragmentActivity implements Serializable {
                     case R.id.nav_settings:
                         selectedFragment = settingsFragment.newInstance();
                         break;
-                    default:
-                        break;
                 }
-
+                // Set the fragment holder as the selected fragment.
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragmentHolder, selectedFragment);
                 transaction.commit();
-
                 return true;
             }
         });
@@ -70,14 +67,6 @@ public class homeController extends FragmentActivity implements Serializable {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmentHolder, homeFragment.newInstance());
         transaction.commit();
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Start the animation
-        this.overridePendingTransition(R.anim.push_left_enter, R.anim.push_left_exit);
     }
 
     @SuppressLint("RestrictedApi")

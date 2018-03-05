@@ -11,9 +11,8 @@ import com.aaronnebbs.peersplitandroidapplication.R;
 
 public class overviewFragment extends Fragment {
 
-    public static overviewFragment newInstance() {
-        overviewFragment fragment = new overviewFragment();
-        return fragment;
+    public overviewFragment(){
+
     }
 
     @Override
@@ -26,13 +25,7 @@ public class overviewFragment extends Fragment {
         return inflater.inflate(R.layout.overview_fragment, container, false);
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
+    public static overviewFragment newInstance() {
+        return new overviewFragment();
     }
 }
