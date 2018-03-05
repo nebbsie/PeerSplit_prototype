@@ -7,6 +7,17 @@
     tools:context="com.aaronnebbs.peersplitandroidapplication.Controllers.homeController">
 
 
+    <FrameLayout
+        android:id="@+id/fragmentHolder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomNavBar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
+
+    </FrameLayout>
+
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
