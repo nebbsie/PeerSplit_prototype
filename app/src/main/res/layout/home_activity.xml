@@ -21,10 +21,11 @@
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_marginTop="20dp"
         android:background="@color/colorPrimaryDark"
         app:menu="@menu/bottom_nav"></android.support.design.widget.BottomNavigationView>
 
