@@ -35,10 +35,11 @@ public class homeFragment extends Fragment {
 
         dataModels = new ArrayList<>();
 
-        dataModels.add(new HomePageRow("First test!"));
-        dataModels.add(new HomePageRow("Second test!"));
-        dataModels.add(new HomePageRow("Third test!"));
-        dataModels.add(new HomePageRow("Last test!"));
+        dataModels.add(new HomePageRow("Lorem Ipsum.txt", "20.56KB"));
+        dataModels.add(new HomePageRow("Lorem Ipsum.jpg", "5.78MB"));
+        dataModels.add(new HomePageRow("Lorem Ipsum.mp4", "200MB"));
+        dataModels.add(new HomePageRow("Lorem Ipsum.jpg", "3.24MB"));
+
 
         adapter = new CustomAdapter(dataModels, getContext());
 
@@ -47,7 +48,7 @@ public class homeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 HomePageRow dataModel= dataModels.get(position);
-                Snackbar.make(view, dataModel.getStr(), Snackbar.LENGTH_LONG).setAction("No action", null).show();
+                Snackbar.make(view, dataModel.getName(), Snackbar.LENGTH_LONG).setAction("No action", null).show();
             }
         });
     }

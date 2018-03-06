@@ -2,59 +2,65 @@ package com.aaronnebbs.peersplitandroidapplication.Model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ImageSelector;
 import com.aaronnebbs.peersplitandroidapplication.R;
-
 import java.util.ArrayList;
-
-/**
- * Created by Aaron on 05/03/2018.
- */
 
 public class CustomAdapter extends ArrayAdapter<HomePageRow> implements View.OnClickListener {
 
-    private ArrayList<HomePageRow> dataSet;
+    private ArrayList<HomePageRow> dataList;
     private int lastPosition = -1;
-    Context mContext;
-
-    private static class ViewHolder {
-        TextView str;
-    }
+    private Context activityContext;
 
     public CustomAdapter(ArrayList<HomePageRow> data, Context context){
         super(context, R.layout.row_item, data);
-        this.dataSet = data;
-        this.mContext = context;
+        this.dataList = data;
+        this.activityContext = context;
     }
 
+    // Used to hold information about the row.
+    private static class ViewHolder {
+        TextView name;
+        TextView size;
+        ImageView fileTypeImage;
+        ImageView downloadImage;
+    }
+
+    // OnClick for the download button.
     @Override
     public void onClick(View v) {
         int position = (Integer) v.getTag();
         Object obj = getItem(position);
         HomePageRow model = (HomePageRow)obj;
-        System.out.println(model.getStr());
+        System.out.println(model.getName());
     }
+
 
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+        final View res;
         HomePageRow row = getItem(position);
         ViewHolder viewHolder;
 
-        final View res;
-
+        // Create a row.
         if(convertView == null){
             viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.row_item, parent, false);
-            viewHolder.str = (TextView) convertView.findViewById(R.id.row_item_string);
+
+            viewHolder.name = convertView.findViewById(R.id.row_item_string);
+            viewHolder.size = convertView.findViewById(R.id.row_size);
+            viewHolder.downloadImage = convertView.findViewById(R.id.row_download_image);
+            viewHolder.fileTypeImage = convertView.findViewById(R.id.row_file_type);
+
             res = convertView;
             convertView.setTag(viewHolder);
         }else{
@@ -64,7 +70,13 @@ public class CustomAdapter extends ArrayAdapter<HomePageRow> implements View.OnC
 
         lastPosition = position;
 
-        viewHolder.str.setText(row.getStr());
+        viewHolder.name.setText(row.getName());
+        viewHolder.size.setText(row.getSize());
+
+        viewHolder.fileTypeImage.setImageResource(ImageSelector.getTypeImage("yo"));
+        viewHolder.downloadImage.setImageResource(R.drawable.ic_file_download_black_24dp);
+        viewHolder.downloadImage.setOnClickListener(this);
+        viewHolder.downloadImage.setTag(position);
 
         return convertView;
     }

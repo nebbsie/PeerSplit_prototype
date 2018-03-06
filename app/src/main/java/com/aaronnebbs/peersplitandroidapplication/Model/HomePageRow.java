@@ -1,17 +1,29 @@
 package com.aaronnebbs.peersplitandroidapplication.Model;
 
+import android.widget.ImageView;
+
 public class HomePageRow {
-    private String str;
+    private String name;
+    private String size;
 
-    public HomePageRow(String str){
-        this.str = str;
+    public HomePageRow(String name, String size){
+        this.name = name;
+        this.size = size;
     }
 
-    public String getStr() {
-        return str;
+    public String getName() {
+        return name;
     }
 
-    public void setStr(String str) {
-        this.str = str;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 }
