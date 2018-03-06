@@ -1,7 +1,5 @@
 package com.aaronnebbs.peersplitandroidapplication.Views;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -12,19 +10,19 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.aaronnebbs.peersplitandroidapplication.Model.CustomAdapter;
+import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
 import java.util.ArrayList;
 
-public class homeFragment extends Fragment {
+public class HomeFragment extends Fragment {
 
     ArrayList<HomePageRow> dataModels;
     ListView listView;
-    private static CustomAdapter adapter;
+    private static BottomNavBarAdapter adapter;
 
-    public homeFragment(){
+    public HomeFragment(){
 
     }
 
@@ -41,7 +39,7 @@ public class homeFragment extends Fragment {
         dataModels.add(new HomePageRow("Lorem Ipsum.jpg", "3.24MB"));
 
 
-        adapter = new CustomAdapter(dataModels, getContext());
+        adapter = new BottomNavBarAdapter(dataModels, getContext());
 
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -64,7 +62,7 @@ public class homeFragment extends Fragment {
         return inflater.inflate(R.layout.home_fragment, container, false);
     }
 
-    public static homeFragment newInstance() {
-        return new homeFragment();
+    public static HomeFragment newInstance() {
+        return new HomeFragment();
     }
 }

@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import com.aaronnebbs.peersplitandroidapplication.R;
 
-public class loginController extends Activity {
+public class LoginController extends Activity {
 
     private EditText username;
     private EditText password;
@@ -34,13 +34,13 @@ public class loginController extends Activity {
 
     // Attempts to login user.
     private void attemptLogin(){
-        Intent i = new Intent(getApplication(), homeController.class);
+        Intent i = new Intent(getApplication(), HomeController.class);
         startActivity(i);
     }
 
     // Links to the register page.
     public void gotoRegisterPage(View v) {
-        Intent i = new Intent(getApplication(), registerController.class);
+        Intent i = new Intent(getApplication(), RegisterController.class);
         startActivity(i);
     }
 

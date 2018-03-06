@@ -12,13 +12,13 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.ImageSelector;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import java.util.ArrayList;
 
-public class CustomAdapter extends ArrayAdapter<HomePageRow> implements View.OnClickListener {
+public class BottomNavBarAdapter extends ArrayAdapter<HomePageRow> implements View.OnClickListener {
 
     private ArrayList<HomePageRow> dataList;
     private int lastPosition = -1;
     private Context activityContext;
 
-    public CustomAdapter(ArrayList<HomePageRow> data, Context context){
+    public BottomNavBarAdapter(ArrayList<HomePageRow> data, Context context){
         super(context, R.layout.row_item, data);
         this.dataList = data;
         this.activityContext = context;
@@ -45,7 +45,6 @@ public class CustomAdapter extends ArrayAdapter<HomePageRow> implements View.OnC
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         final View res;
         HomePageRow row = getItem(position);
         ViewHolder viewHolder;
@@ -70,10 +69,12 @@ public class CustomAdapter extends ArrayAdapter<HomePageRow> implements View.OnC
 
         lastPosition = position;
 
+        // Set the text of the row
         viewHolder.name.setText(row.getName());
         viewHolder.size.setText(row.getSize());
 
-        viewHolder.fileTypeImage.setImageResource(ImageSelector.getTypeImage("yo"));
+        // Set the images for the row
+        viewHolder.fileTypeImage.setImageResource(ImageSelector.getTypeImage(row.getName()));
         viewHolder.downloadImage.setImageResource(R.drawable.ic_file_download_black_24dp);
         viewHolder.downloadImage.setOnClickListener(this);
         viewHolder.downloadImage.setTag(position);

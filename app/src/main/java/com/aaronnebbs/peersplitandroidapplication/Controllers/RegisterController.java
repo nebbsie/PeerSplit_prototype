@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
-public class registerController extends Activity {
+public class RegisterController extends Activity {
     private EditText username;
     private EditText email;
     private EditText password;
@@ -35,7 +35,7 @@ public class registerController extends Activity {
 
     // Goes back to the login screen
     public void goToLoginScreen(){
-        Intent i = new Intent(getApplication(), loginController.class);
+        Intent i = new Intent(getApplication(), LoginController.class);
         startActivity(i);
     }
 

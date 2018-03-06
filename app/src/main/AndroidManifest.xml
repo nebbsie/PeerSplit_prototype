@@ -9,15 +9,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Controllers.loginController">
+        <activity android:name=".Controllers.LoginController">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Controllers.registerController" />
-        <activity android:name=".Controllers.homeController" />
+        <activity android:name=".Controllers.RegisterController" />
+        <activity android:name=".Controllers.HomeController" />
     </application>
 
 </manifest>

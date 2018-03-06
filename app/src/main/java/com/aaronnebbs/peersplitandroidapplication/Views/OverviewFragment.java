@@ -1,6 +1,5 @@
 package com.aaronnebbs.peersplitandroidapplication.Views;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,9 +8,9 @@ import android.view.ViewGroup;
 
 import com.aaronnebbs.peersplitandroidapplication.R;
 
-public class overviewFragment extends Fragment {
+public class OverviewFragment extends Fragment {
 
-    public overviewFragment(){
+    public OverviewFragment(){
 
     }
 
@@ -25,7 +24,7 @@ public class overviewFragment extends Fragment {
         return inflater.inflate(R.layout.overview_fragment, container, false);
     }
 
-    public static overviewFragment newInstance() {
-        return new overviewFragment();
+    public static OverviewFragment newInstance() {
+        return new OverviewFragment();
     }
 }

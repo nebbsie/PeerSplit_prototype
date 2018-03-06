@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
 
-public class settingsFragment extends Fragment {
+public class SettingsFragment extends Fragment {
 
-    public settingsFragment(){
+    public SettingsFragment(){
 
     }
 
@@ -24,8 +24,8 @@ public class settingsFragment extends Fragment {
         return inflater.inflate(R.layout.settings_fragment, container, false);
     }
 
-    public static settingsFragment newInstance() {
-        return new settingsFragment();
+    public static SettingsFragment newInstance() {
+        return new SettingsFragment();
     }
 
 }
