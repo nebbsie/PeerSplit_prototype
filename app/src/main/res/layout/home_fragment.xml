@@ -16,7 +16,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="43dp"
-        android:text="Files In The Cloud"
+        android:text="@string/home_page_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="#2699fb"
         android:textSize="14sp"

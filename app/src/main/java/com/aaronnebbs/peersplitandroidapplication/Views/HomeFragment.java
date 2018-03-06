@@ -46,7 +46,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 HomePageRow dataModel= dataModels.get(position);
-                Snackbar.make(view, dataModel.getName(), Snackbar.LENGTH_LONG).setAction("No action", null).show();
             }
         });
     }

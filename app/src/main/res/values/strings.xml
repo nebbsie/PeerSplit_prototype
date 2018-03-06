@@ -10,11 +10,18 @@
     <string name="buttton_gotAnAccount">Got An Account?</string>
     <string name="signup">SIGN UP</string>
 
+    <!-- Navigation Bar  -->
     <string name="nav_home"></string>
     <string name="nav_overview"></string>
     <string name="nav_upload"></string>
     <string name="nav_profile"></string>
     <string name="nav_settings"></string>
+
+    <!-- Profile Page -->
+    <string name="profile_page_title">Profile</string>
+
+    <!-- Home Page -->
+    <string name="home_page_title">Files In The Cloud</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
