@@ -17,13 +17,15 @@ import com.aaronnebbs.peersplitandroidapplication.Views.overviewFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.profileFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.settingsFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.uploadFragment;
+import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
 public class homeController extends FragmentActivity implements Serializable {
 
     // Bottom navigation bar used on all pages.
-    private BottomNavigationView navBar;
+    private BottomNavigationViewEx navBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,25 @@ public class homeController extends FragmentActivity implements Serializable {
 
         // Setup the navigation bar.
         navBar = findViewById(R.id.bottomNavBar);
-        removeShiftMode(navBar);
+        navBar.enableAnimation(false);
+        navBar.enableShiftingMode(false);
+        navBar.enableItemShiftingMode(false);
+
+        navBar.setIconSizeAt(0, 30, 30);
+        navBar.getIconAt(0).setPadding(0, 25, 0, 0);
+
+        navBar.setIconSizeAt(1, 30, 30);
+        navBar.getIconAt(1).setPadding(0, 25, 0, 0);
+
+        navBar.setIconSizeAt(2, 40, 40);
+
+        navBar.setIconSizeAt(3, 30, 30);
+        navBar.getIconAt(3).setPadding(0, 25, 0, 0);
+
+        navBar.setIconSizeAt(4, 30, 30);
+        navBar.getIconAt(4).setPadding(0, 25, 0, 0);
+
+        //removeShiftMode(navBar);
 
         navBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
