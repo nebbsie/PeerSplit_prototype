@@ -1,15 +1,20 @@
 <resources>
-    <string name="app_name">PeerSplitAndroidApplication</string>
+    <string name="app_name">PeerSplit</string>
 
+    <!-- Login Page -->
+    <string name="button_needAnAccount">Need An Account?</string>
 
+    <!-- Register Page -->
+    <string name="buttton_gotAnAccount">Got An Account?</string>
+    <string name="signup">SIGN UP</string>
+
+    <!-- Multi Use -->
     <string name="textField_username_hint">username</string>
     <string name="textField_password_hint">password</string>
     <string name="textField_passwordAgain_hint">password again</string>
     <string name="textField_email_hint">email</string>
-    <string name="button_needAnAccount">Need An Account?</string>
-    <string name="buttton_gotAnAccount">Got An Account?</string>
-    <string name="signup">SIGN UP</string>
 
+    <!-- Home Activity -->
     <!-- Navigation Bar  -->
     <string name="nav_home"></string>
     <string name="nav_overview"></string>
@@ -20,10 +25,10 @@
     <!-- Profile Page -->
     <string name="profile_page_title">Profile</string>
 
+    <!-- Settings Page -->
+    <string name="settings_page_title">Settings</string>
+
     <!-- Home Page -->
     <string name="home_page_title">Files In The Cloud</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
