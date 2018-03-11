@@ -25,6 +25,9 @@
     <!-- Profile Page -->
     <string name="profile_page_title">Profile</string>
 
+    <!-- Overview Page -->
+    <string name="overview_page_title">Overview</string>
+
     <!-- Settings Page -->
     <string name="settings_page_title">Settings</string>
 
