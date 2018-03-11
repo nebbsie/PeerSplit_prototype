@@ -6,4 +6,5 @@
     <color name="textColorHint">@color/colorAccent</color>
     <color name="backgroundColour">#def1ff</color>
     <color name="colorAccentFileSize">#a9d9ff</color>
+    <color name="colorRed">#ff292c</color>
 </resources>
