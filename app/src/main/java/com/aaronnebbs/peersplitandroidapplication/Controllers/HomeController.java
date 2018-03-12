@@ -21,6 +21,14 @@ public class HomeController extends FragmentActivity implements Serializable {
     // Bottom navigation bar used on all pages.
     private BottomNavigationViewEx navBar;
     private long lastNumber;
+    private boolean firstTime;
+
+    private Fragment selectedFragment;
+    private HomeFragment homeActivity;
+    private OverviewFragment overviewActivity;
+    private UploadFragment uploadActivity;
+    private ProfileFragment profileActivity;
+    private SettingsFragment settingsActivity;
 
     // Called when the page is created.
     @Override
@@ -28,36 +36,40 @@ public class HomeController extends FragmentActivity implements Serializable {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
+        firstTime = true;
+        homeActivity = new HomeFragment();
+        overviewActivity = new OverviewFragment();
+        uploadActivity = new UploadFragment();
+        profileActivity = new ProfileFragment();
+        settingsActivity = new SettingsFragment();
+
         setupNavBar();
+
         // Setup the onclick listener for the bottom
         navBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment selectedFragment = null;
                 boolean upload = false;
-
                 // Check if the same tab is not clicked twice.
                 if(item.getItemId() != lastNumber){
-
                     switch (item.getItemId()){
                         case R.id.nav_home:
-                            selectedFragment = HomeFragment.newInstance();
+                            selectedFragment = homeActivity;
                             break;
                         case R.id.nav_overrview:
-                            selectedFragment = OverviewFragment.newInstance();
+                            selectedFragment = overviewActivity;
                             break;
                         case R.id.nav_upload:
-                            selectedFragment = UploadFragment.newInstance();
+                            selectedFragment = uploadActivity;
                             upload = true;
                             break;
                         case R.id.nav_profile:
-                            selectedFragment = ProfileFragment.newInstance();
+                            selectedFragment = profileActivity;
                             break;
                         case R.id.nav_settings:
-                            selectedFragment = SettingsFragment.newInstance();
+                            selectedFragment = settingsActivity;
                             break;
                     }
-
                     // Set the fragment holder as the selected fragment.
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -65,27 +77,25 @@ public class HomeController extends FragmentActivity implements Serializable {
                     if(upload){
                         transaction.setCustomAnimations(R.anim.push_up_in, R.anim.push_up_out);
                     }else{
-                        if(item.getItemId() < lastNumber){
+                        if((item.getItemId() < lastNumber) && !firstTime){
                             transaction.setCustomAnimations(R.anim.push_right_enter, R.anim.push_right_exit);
                         }else{
                             transaction.setCustomAnimations(R.anim.push_left_enter, R.anim.push_left_exit);
                         }
+                        firstTime = false;
                     }
                     lastNumber = item.getItemId();
                     transaction.replace(R.id.fragmentHolder, selectedFragment);
                     transaction.commit();
-
                     return true;
                 }
-
-
                 return false;
             }
         });
 
         //Manually displaying the first fragment - one time only
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragmentHolder, HomeFragment.newInstance());
+        transaction.replace(R.id.fragmentHolder, homeActivity);
         transaction.commit();
     }
 

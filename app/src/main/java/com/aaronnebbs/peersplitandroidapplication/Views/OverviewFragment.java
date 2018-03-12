@@ -14,18 +14,14 @@ public class OverviewFragment extends Fragment {
     private PieView cloudStorageChart;
     private PieView localStorageChart;
 
-    public OverviewFragment(){
-
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setupUI();
+    }
+
+    // Links UI elements and sets the design for the progress bar.
+    private void setupUI(){
         // Setup the pie charts
         cloudStorageChart = getView().findViewById(R.id.cloudStoragePieChart);
         localStorageChart = getView().findViewById(R.id.localStoragePieChart);
@@ -50,13 +46,18 @@ public class OverviewFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.overview_fragment, container, false);
-
     }
 
-    public static OverviewFragment newInstance() {
-        return new OverviewFragment();
-    }
 }

@@ -14,52 +14,52 @@ import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Timer;
 
 public class HomeFragment extends Fragment {
 
-    ArrayList<HomePageRow> dataModels;
-    ListView listView;
+    private ArrayList<HomePageRow> dataModels;
+    private ListView listView;
     private static BottomNavBarAdapter adapter;
-
-    public HomeFragment(){
-
-    }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         listView = getView().findViewById(R.id.home_listview);
-
         dataModels = new ArrayList<>();
-
-        dataModels.add(new HomePageRow("LoremIpsum.txt", "20.56KB"));
-        dataModels.add(new HomePageRow("LoremIpsum.jpg", "5.78MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.mp4", "200MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.jpg", "3.24MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.wmv", "66.24MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.txt", "20.56KB"));
-        dataModels.add(new HomePageRow("LoremIpsum.jpg", "5.78MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.mp4", "200MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.jpg", "3.24MB"));
-        dataModels.add(new HomePageRow("LoremIpsum.wmv", "66.24MB"));
-
-
         adapter = new BottomNavBarAdapter(dataModels, getContext());
-
         listView.setAdapter(adapter);
+
+        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HomePageRow dataModel= dataModels.get(position);
+                //HomePageRow dataModel= dataModels.get(position);
             }
         });
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        System.out.println("RESUME");
+        //adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -67,7 +67,4 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.home_fragment, container, false);
     }
 
-    public static HomeFragment newInstance() {
-        return new HomeFragment();
-    }
 }

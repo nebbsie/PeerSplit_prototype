@@ -10,8 +10,9 @@ import com.aaronnebbs.peersplitandroidapplication.R;
 
 public class ProfileFragment extends Fragment {
 
-    public ProfileFragment(){
-
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -22,9 +23,5 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.profile_fragment, container, false);
-    }
-
-    public static ProfileFragment newInstance() {
-        return new ProfileFragment();
     }
 }

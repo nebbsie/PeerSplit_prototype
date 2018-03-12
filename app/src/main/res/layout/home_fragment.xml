@@ -34,6 +34,6 @@
         android:layout_marginTop="30dp"
         android:background="@color/colorPrimary"
         android:divider="@color/backgroundColour"
-        android:dividerHeight="20dp"
+        android:dividerHeight="10dp"
         android:scrollbars="none" />
 </RelativeLayout>
