@@ -17,8 +17,10 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
 
 public class HomeController extends FragmentActivity implements Serializable {
+
     // Bottom navigation bar used on all pages.
     private BottomNavigationViewEx navBar;
+    private long lastNumber;
 
     // Called when the page is created.
     @Override
@@ -27,12 +29,13 @@ public class HomeController extends FragmentActivity implements Serializable {
         setContentView(R.layout.home_activity);
 
         setupNavBar();
-
         // Setup the onclick listener for the bottom
         navBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
+                boolean upload = false;
+
                 switch (item.getItemId()){
                     case R.id.nav_home:
                         selectedFragment = HomeFragment.newInstance();
@@ -42,6 +45,7 @@ public class HomeController extends FragmentActivity implements Serializable {
                         break;
                     case R.id.nav_upload:
                         selectedFragment = UploadFragment.newInstance();
+                        upload = true;
                         break;
                     case R.id.nav_profile:
                         selectedFragment = ProfileFragment.newInstance();
@@ -52,6 +56,18 @@ public class HomeController extends FragmentActivity implements Serializable {
                 }
                 // Set the fragment holder as the selected fragment.
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+                // Work out what animation to use for the fragment transition.
+                if(upload){
+                    transaction.setCustomAnimations(R.anim.push_up_in, R.anim.push_up_out);
+                }else{
+                    if(item.getItemId() < lastNumber){
+                        transaction.setCustomAnimations(R.anim.push_right_enter, R.anim.push_right_exit);
+                    }else{
+                        transaction.setCustomAnimations(R.anim.push_left_enter, R.anim.push_left_exit);
+                    }
+                }
+                lastNumber = item.getItemId();
                 transaction.replace(R.id.fragmentHolder, selectedFragment);
                 transaction.commit();
                 return true;
@@ -62,6 +78,13 @@ public class HomeController extends FragmentActivity implements Serializable {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmentHolder, HomeFragment.newInstance());
         transaction.commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Start the animation
+        this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
     }
 
     // Setup the look and feel of the bottom navigation bar.

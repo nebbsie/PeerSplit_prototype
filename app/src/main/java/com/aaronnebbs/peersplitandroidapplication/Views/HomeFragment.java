@@ -37,6 +37,12 @@ public class HomeFragment extends Fragment {
         dataModels.add(new HomePageRow("LoremIpsum.jpg", "5.78MB"));
         dataModels.add(new HomePageRow("LoremIpsum.mp4", "200MB"));
         dataModels.add(new HomePageRow("LoremIpsum.jpg", "3.24MB"));
+        dataModels.add(new HomePageRow("LoremIpsum.wmv", "66.24MB"));
+        dataModels.add(new HomePageRow("LoremIpsum.txt", "20.56KB"));
+        dataModels.add(new HomePageRow("LoremIpsum.jpg", "5.78MB"));
+        dataModels.add(new HomePageRow("LoremIpsum.mp4", "200MB"));
+        dataModels.add(new HomePageRow("LoremIpsum.jpg", "3.24MB"));
+        dataModels.add(new HomePageRow("LoremIpsum.wmv", "66.24MB"));
 
 
         adapter = new BottomNavBarAdapter(dataModels, getContext());

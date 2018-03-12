@@ -35,5 +35,5 @@
         android:background="@color/colorPrimary"
         android:divider="@color/backgroundColour"
         android:dividerHeight="20dp"
-        android:scrollbars="vertical" />
+        android:scrollbars="none" />
 </RelativeLayout>

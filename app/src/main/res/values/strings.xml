@@ -15,6 +15,7 @@
     <string name="textField_email_hint">email</string>
 
     <!-- Home Activity -->
+
     <!-- Navigation Bar  -->
     <string name="nav_home"></string>
     <string name="nav_overview"></string>
@@ -33,5 +34,8 @@
 
     <!-- Home Page -->
     <string name="home_page_title">Files In The Cloud</string>
+
+    <!-- Home Page -->
+    <string name="upload_page_title">File Upload</string>
 
 </resources>
