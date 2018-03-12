@@ -36,41 +36,50 @@ public class HomeController extends FragmentActivity implements Serializable {
                 Fragment selectedFragment = null;
                 boolean upload = false;
 
-                switch (item.getItemId()){
-                    case R.id.nav_home:
-                        selectedFragment = HomeFragment.newInstance();
-                        break;
-                    case R.id.nav_overrview:
-                        selectedFragment = OverviewFragment.newInstance();
-                        break;
-                    case R.id.nav_upload:
-                        selectedFragment = UploadFragment.newInstance();
-                        upload = true;
-                        break;
-                    case R.id.nav_profile:
-                        selectedFragment = ProfileFragment.newInstance();
-                        break;
-                    case R.id.nav_settings:
-                        selectedFragment = SettingsFragment.newInstance();
-                        break;
-                }
-                // Set the fragment holder as the selected fragment.
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                // Check if the same tab is not clicked twice.
+                if(item.getItemId() != lastNumber){
 
-                // Work out what animation to use for the fragment transition.
-                if(upload){
-                    transaction.setCustomAnimations(R.anim.push_up_in, R.anim.push_up_out);
-                }else{
-                    if(item.getItemId() < lastNumber){
-                        transaction.setCustomAnimations(R.anim.push_right_enter, R.anim.push_right_exit);
-                    }else{
-                        transaction.setCustomAnimations(R.anim.push_left_enter, R.anim.push_left_exit);
+                    switch (item.getItemId()){
+                        case R.id.nav_home:
+                            selectedFragment = HomeFragment.newInstance();
+                            break;
+                        case R.id.nav_overrview:
+                            selectedFragment = OverviewFragment.newInstance();
+                            break;
+                        case R.id.nav_upload:
+                            selectedFragment = UploadFragment.newInstance();
+                            upload = true;
+                            break;
+                        case R.id.nav_profile:
+                            selectedFragment = ProfileFragment.newInstance();
+                            break;
+                        case R.id.nav_settings:
+                            selectedFragment = SettingsFragment.newInstance();
+                            break;
                     }
+
+                    // Set the fragment holder as the selected fragment.
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+                    // Work out what animation to use for the fragment transition.
+                    if(upload){
+                        transaction.setCustomAnimations(R.anim.push_up_in, R.anim.push_up_out);
+                    }else{
+                        if(item.getItemId() < lastNumber){
+                            transaction.setCustomAnimations(R.anim.push_right_enter, R.anim.push_right_exit);
+                        }else{
+                            transaction.setCustomAnimations(R.anim.push_left_enter, R.anim.push_left_exit);
+                        }
+                    }
+                    lastNumber = item.getItemId();
+                    transaction.replace(R.id.fragmentHolder, selectedFragment);
+                    transaction.commit();
+
+                    return true;
                 }
-                lastNumber = item.getItemId();
-                transaction.replace(R.id.fragmentHolder, selectedFragment);
-                transaction.commit();
-                return true;
+
+
+                return false;
             }
         });
 
