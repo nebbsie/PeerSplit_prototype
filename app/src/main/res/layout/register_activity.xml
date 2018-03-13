@@ -148,7 +148,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/editText_passwordReg" />
 
             <Button
-                android:id="@+id/button_login"
+                android:id="@+id/button_register"
                 android:layout_width="360dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="64dp"
@@ -174,7 +174,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_login"
+                app:layout_constraintTop_toBottomOf="@+id/button_register"
                 app:layout_constraintVertical_bias="1.0" />
 
         </android.support.constraint.ConstraintLayout>

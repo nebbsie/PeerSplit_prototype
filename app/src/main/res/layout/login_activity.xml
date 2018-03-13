@@ -2,7 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/BaseLayout"
+    android:id="@+id/login_baselayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_light"
@@ -84,7 +84,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/editText_username" />
 
             <Button
-                android:id="@+id/button_login"
+                android:id="@+id/button_register"
                 android:layout_width="360dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="64dp"
@@ -108,7 +108,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_login" />
+                app:layout_constraintTop_toBottomOf="@+id/button_register" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

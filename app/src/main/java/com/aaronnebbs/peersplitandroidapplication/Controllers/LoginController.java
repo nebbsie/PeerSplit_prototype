@@ -3,19 +3,29 @@ package com.aaronnebbs.peersplitandroidapplication.Controllers;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginController extends Activity {
 
     private EditText username;
     private EditText password;
     private Button loginButton;
-
+    private String usernameStr = "nebbsie@gmail.com";
+    private String passwordStr = "Bellamy1995";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +33,12 @@ public class LoginController extends Activity {
         setContentView(R.layout.login_activity);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setupUI();
+        UserManager.setup();
+        SettingsHelper.setup();
+
+        if(SettingsHelper.AUTO_LOGIN){
+            attemptLogin();
+        }
     }
 
     @Override
@@ -34,8 +50,37 @@ public class LoginController extends Activity {
 
     // Attempts to login user.
     private void attemptLogin(){
-        Intent i = new Intent(getApplication(), HomeController.class);
-        startActivity(i);
+        boolean attemptLogin = true;
+
+        // Check if the username is empty.
+        if(usernameStr.isEmpty()){
+            Toast.makeText(LoginController.this, "Username Is Empty!", Toast.LENGTH_SHORT).show();
+            attemptLogin = false;
+        }
+        // Check if the password is empty.
+        if((passwordStr.isEmpty()) && attemptLogin){
+            Toast.makeText(LoginController.this, "Password Is Empty!", Toast.LENGTH_SHORT).show();
+            attemptLogin = false;
+        }
+
+        // Attempt login if valid variables are given.
+        if(attemptLogin) {
+            // Attempt login.
+            UserManager.authentication.signInWithEmailAndPassword(usernameStr, passwordStr)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                UserManager.user = UserManager.authentication.getCurrentUser();
+                                Toast.makeText(LoginController.this, "Username: " + UserManager.user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                                Intent i = new Intent(getApplication(), HomeController.class);
+                                startActivity(i);
+                            } else {
+                                Toast.makeText(LoginController.this, "Failed To Signin!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
     }
 
     // Links to the register page.
@@ -48,11 +93,13 @@ public class LoginController extends Activity {
     private void setupUI(){
         username = findViewById(R.id.editText_username);
         password = findViewById(R.id.editText_password);
-        loginButton = findViewById(R.id.button_login);
+        loginButton = findViewById(R.id.button_register);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                usernameStr = username.getText().toString();
+                passwordStr = password.getText().toString();
                 attemptLogin();
             }
         });
