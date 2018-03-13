@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "164200786361",
+    "firebase_url": "https://peersplit-fyp.firebaseio.com",
+    "project_id": "peersplit-fyp",
+    "storage_bucket": "peersplit-fyp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:164200786361:android:c1cd5e29109e584e",
+        "android_client_info": {
+          "package_name": "com.aaronnebbs.peersplitandroidapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "164200786361-3r30pe42smmo6v5tckitnntcn3dd5s93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5GNa1VWKST4X7m1g40A-U0QczIdS0Fh0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

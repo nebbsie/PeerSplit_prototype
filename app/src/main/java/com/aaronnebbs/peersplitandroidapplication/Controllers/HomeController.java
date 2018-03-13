@@ -6,7 +6,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
+import android.support.v4.view.GestureDetectorCompat;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.aaronnebbs.peersplitandroidapplication.Views.HomeFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.OverviewFragment;
@@ -17,18 +21,19 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
 
 public class HomeController extends FragmentActivity implements Serializable {
-
     // Bottom navigation bar used on all pages.
     private BottomNavigationViewEx navBar;
     private long lastNumber;
     private boolean firstTime;
 
+    // Fragments
     private Fragment selectedFragment;
     private HomeFragment homeActivity;
     private OverviewFragment overviewActivity;
     private UploadFragment uploadActivity;
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
+
 
     // Called when the page is created.
     @Override
@@ -102,7 +107,6 @@ public class HomeController extends FragmentActivity implements Serializable {
     @Override
     protected void onResume() {
         super.onResume();
-        // Start the animation
         this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
     }
 
@@ -123,4 +127,7 @@ public class HomeController extends FragmentActivity implements Serializable {
         navBar.setIconSizeAt(4, 30, 30);
         navBar.getIconAt(4).setPadding(0, 25, 0, 0);
     }
+
 }
+
+

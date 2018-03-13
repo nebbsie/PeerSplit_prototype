@@ -48,7 +48,6 @@ public class UploadFragment extends Fragment {
         });
     }
 
-
     // Attempt to upload file.
     private void attemptUpload(){
         System.out.println("Attempting Upload");
