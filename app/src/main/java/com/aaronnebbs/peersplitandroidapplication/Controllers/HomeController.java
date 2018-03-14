@@ -119,7 +119,7 @@ public class HomeController extends FragmentActivity implements Serializable {
     @Override
     protected void onResume() {
         super.onResume();
-        this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
+        this.overridePendingTransition(R.anim.push_down_in, R.anim.push_down_out);
     }
 
     // Setup the look and feel of the bottom navigation bar.
