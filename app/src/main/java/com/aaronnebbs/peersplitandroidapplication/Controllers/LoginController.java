@@ -39,11 +39,8 @@ public class LoginController extends Activity {
         setupUI();
 
         SettingsHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
-
         UserManager.setup();
         SettingsHelper.setup();
-
-
 
         if(SettingsHelper.AUTO_LOGIN){
             usernameStr = SettingsHelper.getEmail();

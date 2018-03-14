@@ -1,5 +1,8 @@
 package com.aaronnebbs.peersplitandroidapplication.Views;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,11 +12,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.R;
+
+import java.io.File;
+import java.util.concurrent.ExecutionException;
+
 import az.plainpie.PieView;
 
 public class UploadFragment extends Fragment {
 
+    private static final int READ_REQUEST_CODE = 42;
     private PieView uploadingChart;
     private LinearLayout selectedFileLayout;
     private TextView fileName;
@@ -31,6 +41,7 @@ public class UploadFragment extends Fragment {
         clickToSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                selectFile();
                 uploadMode();
             }
         });
@@ -46,6 +57,29 @@ public class UploadFragment extends Fragment {
                 selectionMode();
             }
         });
+    }
+
+    // Opens the file picker
+    private void selectFile(){
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        startActivityForResult(intent, READ_REQUEST_CODE);
+    }
+
+    // Called when returning from an activity
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
+            // Check if the data selected is valid.
+            if(data != null){
+                Uri uri = data.getData();
+                File fileCopy = FileHelper.getFileFromURI(uri, getActivity());
+                fileName.setText(fileCopy.getName());
+                fileSize.setText(FileHelper.getFileSizeString(fileCopy));
+            }
+        }
     }
 
     // Attempt to upload file.
@@ -97,7 +131,6 @@ public class UploadFragment extends Fragment {
     public void onResume() {
         super.onResume();
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

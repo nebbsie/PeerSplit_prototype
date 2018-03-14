@@ -27,12 +27,14 @@
     <LinearLayout
         android:id="@+id/fileSelectedBar"
         android:layout_width="0dp"
-        android:layout_height="370dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="10dp"
         android:background="@color/colorPrimary"
         android:orientation="vertical"
+        android:paddingBottom="10dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="20dp"
-            android:paddingTop="30dp"
+            android:paddingTop="10dp"
             android:text="FILE NAME"
             android:textColor="@color/fileUploadColour"
             android:textSize="10sp"
@@ -107,7 +109,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             plainpie:inner_pie_padding="30"
             plainpie:inner_text_visibility="true"
             plainpie:percentage="75"
@@ -117,11 +119,11 @@
 
     <Button
         android:id="@+id/uploadFileButton"
-        android:layout_width="360dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/uploadbutton"
         android:visibility="invisible"
@@ -133,7 +135,7 @@
     <TextView
         android:id="@+id/clickToSelectFileButton"
         android:layout_width="0dp"
-        android:layout_height="366dp"
+        android:layout_height="340dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
@@ -148,24 +150,21 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.42000002" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/removeFile_upload"
         android:layout_width="35dp"
         android:layout_height="35dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@android:drawable/ic_delete"
         android:backgroundTint="@color/colorPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.94"
+        app:layout_constraintBottom_toBottomOf="@+id/textView6"
+        app:layout_constraintEnd_toEndOf="@+id/fileSelectedBar"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.060000002" />
+        app:layout_constraintTop_toTopOf="@+id/textView6"
+        app:layout_constraintVertical_bias="0.62" />
 
 </android.support.constraint.ConstraintLayout>
