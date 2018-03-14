@@ -1,11 +1,11 @@
-package com.aaronnebbs.peersplitandroidapplication.Views;
+package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,13 +14,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.R;
+
 import java.io.File;
-import java.util.concurrent.ExecutionException;
+
 import az.plainpie.PieView;
 
-public class UploadFragment extends Fragment {
+public class UploadController extends Activity {
 
     private static final int READ_REQUEST_CODE = 42;
     private PieView uploadingChart;
@@ -32,10 +34,12 @@ public class UploadFragment extends Fragment {
     private Button removeFile;
     private ProgressBar loadingBar;
     private TextView fileStatus;
+    private Button goBack;
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.upload_fragment);
         setupUI();
         selectionMode();
 
@@ -58,7 +62,16 @@ public class UploadFragment extends Fragment {
                 selectionMode();
             }
         });
+
+        goBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplication(), HomeController.class);
+                startActivity(i);
+            }
+        });
     }
+
 
     // Copies files from the local file system into a new file.
     private void copyFileForUpload(final Intent data){
@@ -69,13 +82,13 @@ public class UploadFragment extends Fragment {
             @Override
             public void run() {
                 Uri uri = data.getData();
-                Pair<String, String> pair = FileHelper.getNameandSize(uri, getActivity());
+                Pair<String, String> pair = FileHelper.getNameandSize(uri, UploadController.this);
                 fileName.setText(pair.first);
                 fileSize.setText(pair.second);
 
-                File fileCopy = FileHelper.getFileFromURI(uri, getActivity());
+                File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
                 // Run the change UI on the UI thread.
-                getActivity().runOnUiThread(new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         uploadMode();
@@ -143,15 +156,16 @@ public class UploadFragment extends Fragment {
     // Links UI elements and sets the design for the progress bar.
     private void setupUI(){
         // Setup the widgets
-        uploadingChart = getView().findViewById(R.id.fileUploadingPieChart);
-        selectedFileLayout = getView().findViewById(R.id.fileSelectedBar);
-        fileName = getView().findViewById(R.id.fileName_upload);
-        fileSize = getView().findViewById(R.id.fileSize_upload);
-        uploadButton = getView().findViewById(R.id.uploadFileButton);
-        clickToSelectFile = getView().findViewById(R.id.clickToSelectFileButton);
-        removeFile = getView().findViewById(R.id.removeFile_upload);
-        loadingBar = getView().findViewById(R.id.upload_loadingBar);
-        fileStatus = getView().findViewById(R.id.upload_statusBarTitle);
+        uploadingChart = findViewById(R.id.fileUploadingPieChart);
+        selectedFileLayout = findViewById(R.id.fileSelectedBar);
+        fileName = findViewById(R.id.fileName_upload);
+        fileSize = findViewById(R.id.fileSize_upload);
+        uploadButton = findViewById(R.id.uploadFileButton);
+        clickToSelectFile = findViewById(R.id.clickToSelectFileButton);
+        removeFile = findViewById(R.id.removeFile_upload);
+        loadingBar = findViewById(R.id.upload_loadingBar);
+        fileStatus = findViewById(R.id.upload_statusBarTitle);
+        goBack = findViewById(R.id.fileUpload_back);
 
         // Set bar colour
         uploadingChart.setPercentageBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -170,15 +184,8 @@ public class UploadFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.upload_fragment, container, false);
-    }
 }

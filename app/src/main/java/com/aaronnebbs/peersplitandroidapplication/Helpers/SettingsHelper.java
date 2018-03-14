@@ -14,7 +14,6 @@ public class SettingsHelper {
     private final static String EMAILSTR = "EMAIL";
     private final static String PASSWORDSTR = "PASSWORD";
 
-
     public static boolean AUTO_LOGIN;
     public static boolean CHUNK_STORAGE;
     public static boolean MOBILE_NETWORK;

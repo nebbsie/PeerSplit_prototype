@@ -5,13 +5,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Pair;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 
 public class FileHelper {
 
@@ -20,7 +18,6 @@ public class FileHelper {
         int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
         int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
         returnCursor.moveToFirst();
-        System.out.println(returnCursor.getString(nameIndex));
         return new Pair<>(returnCursor.getString(nameIndex), getFileSizeString(returnCursor.getLong(sizeIndex)));
     }
 

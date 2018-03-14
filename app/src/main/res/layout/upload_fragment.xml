@@ -184,4 +184,17 @@
         app:layout_constraintTop_toTopOf="@+id/clickToSelectFileButton"
         app:layout_constraintVertical_bias="1.0" />
 
+    <Button
+        android:id="@+id/fileUpload_back"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/backward_arrow"
+        android:backgroundTint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="@+id/textView6"
+        app:layout_constraintEnd_toStartOf="@+id/textView6"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView6" />
+
 </android.support.constraint.ConstraintLayout>

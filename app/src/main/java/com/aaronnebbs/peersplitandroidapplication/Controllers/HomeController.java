@@ -1,22 +1,19 @@
 package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
-import android.support.v4.view.GestureDetectorCompat;
-import android.view.GestureDetector;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.aaronnebbs.peersplitandroidapplication.Views.HomeFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.OverviewFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.ProfileFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.SettingsFragment;
-import com.aaronnebbs.peersplitandroidapplication.Views.UploadFragment;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
 
@@ -30,7 +27,6 @@ public class HomeController extends FragmentActivity implements Serializable {
     private Fragment selectedFragment;
     private HomeFragment homeActivity;
     private OverviewFragment overviewActivity;
-    private UploadFragment uploadActivity;
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
 
@@ -55,7 +51,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         firstTime = true;
         homeActivity = new HomeFragment();
         overviewActivity = new OverviewFragment();
-        uploadActivity = new UploadFragment();
         profileActivity = new ProfileFragment();
         settingsActivity = new SettingsFragment();
 
@@ -66,6 +61,8 @@ public class HomeController extends FragmentActivity implements Serializable {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 boolean upload = false;
+                boolean isUpload = false;
+
                 // Check if the same tab is not clicked twice.
                 if(item.getItemId() != lastNumber){
                     switch (item.getItemId()){
@@ -76,8 +73,9 @@ public class HomeController extends FragmentActivity implements Serializable {
                             selectedFragment = overviewActivity;
                             break;
                         case R.id.nav_upload:
-                            selectedFragment = uploadActivity;
-                            upload = true;
+                            Intent i = new Intent(getApplication(), UploadController.class);
+                            startActivity(i);
+                            isUpload = true;
                             break;
                         case R.id.nav_profile:
                             selectedFragment = profileActivity;
@@ -89,21 +87,24 @@ public class HomeController extends FragmentActivity implements Serializable {
                     // Set the fragment holder as the selected fragment.
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-                    // Work out what animation to use for the fragment transition.
-                    if(upload){
-                        transaction.setCustomAnimations(R.anim.push_up_in, R.anim.push_up_out);
-                    }else{
-                        if((item.getItemId() < lastNumber) && !firstTime){
-                            transaction.setCustomAnimations(R.anim.push_right_enter, R.anim.push_right_exit);
+                    if(!isUpload){
+                        // Work out what animation to use for the fragment transition.
+                        if(upload){
+                            transaction.setCustomAnimations(R.anim.push_up_in, R.anim.push_up_out);
                         }else{
-                            transaction.setCustomAnimations(R.anim.push_left_enter, R.anim.push_left_exit);
+                            if((item.getItemId() < lastNumber) && !firstTime){
+                                transaction.setCustomAnimations(R.anim.push_right_enter, R.anim.push_right_exit);
+                            }else{
+                                transaction.setCustomAnimations(R.anim.push_left_enter, R.anim.push_left_exit);
+                            }
+                            firstTime = false;
                         }
-                        firstTime = false;
+                        lastNumber = item.getItemId();
+                        transaction.replace(R.id.fragmentHolder, selectedFragment);
+                        transaction.commit();
+                        return true;
                     }
-                    lastNumber = item.getItemId();
-                    transaction.replace(R.id.fragmentHolder, selectedFragment);
-                    transaction.commit();
-                    return true;
+
                 }
                 return false;
             }
