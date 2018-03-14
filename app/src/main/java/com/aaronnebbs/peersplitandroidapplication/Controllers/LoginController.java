@@ -81,7 +81,7 @@ public class LoginController extends Activity {
                             if (task.isSuccessful()) {
                                 UserManager.user = UserManager.authentication.getCurrentUser();
                                 SettingsHelper.setLoginDetails(usernameStr, passwordStr);
-                                Intent i = new Intent(getApplication(), HomeController.class);
+                                Intent i = new Intent(getApplication(), WelcomeController.class);
                                 startActivity(i);
                             } else {
                                 Toast.makeText(LoginController.this, "Failed To Signin!", Toast.LENGTH_SHORT).show();

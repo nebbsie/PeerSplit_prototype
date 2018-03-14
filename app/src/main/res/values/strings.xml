@@ -35,7 +35,10 @@
     <!-- Home Page -->
     <string name="home_page_title">Files In The Cloud</string>
 
-    <!-- Home Page -->
+    <!-- Welcome Page -->
+    <string name="welcome_page_title">Welcome To Peer Split!</string>
+
+    <!-- Upload Page -->
     <string name="upload_page_title">File Upload</string>
 
 </resources>

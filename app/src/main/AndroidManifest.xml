@@ -18,7 +18,8 @@
         </activity>
         <activity android:name=".Controllers.RegisterController" />
         <activity android:name=".Controllers.HomeController" />
-        <activity android:name=".Controllers.UploadController"></activity>
+        <activity android:name=".Controllers.UploadController" />
+        <activity android:name=".Controllers.WelcomeController"></activity>
     </application>
 
 </manifest>
