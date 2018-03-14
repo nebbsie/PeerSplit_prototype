@@ -80,7 +80,6 @@ public class LoginController extends Activity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 UserManager.user = UserManager.authentication.getCurrentUser();
-                                Toast.makeText(LoginController.this, "Username: " + UserManager.user.getDisplayName(), Toast.LENGTH_SHORT).show();
                                 SettingsHelper.setLoginDetails(usernameStr, passwordStr);
                                 Intent i = new Intent(getApplication(), HomeController.class);
                                 startActivity(i);
@@ -113,5 +112,4 @@ public class LoginController extends Activity {
             }
         });
     }
-
 }

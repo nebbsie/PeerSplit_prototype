@@ -14,13 +14,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.R;
-
 import java.io.File;
 import java.util.concurrent.ExecutionException;
-
 import az.plainpie.PieView;
 
 public class UploadFragment extends Fragment {
@@ -63,9 +60,34 @@ public class UploadFragment extends Fragment {
         });
     }
 
+    // Copies files from the local file system into a new file.
+    private void copyFileForUpload(final Intent data){
+        // Set ui to show file loading.
+        loadingMode();
+        // Get a copy of the file on a seperate thread to not lockup the ui.
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Uri uri = data.getData();
+                Pair<String, String> pair = FileHelper.getNameandSize(uri, getActivity());
+                fileName.setText(pair.first);
+                fileSize.setText(pair.second);
+
+                File fileCopy = FileHelper.getFileFromURI(uri, getActivity());
+                // Run the change UI on the UI thread.
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        uploadMode();
+                    }
+                });
+            }
+        });
+        thread.start();
+    }
+
     // Opens the file picker
     private void selectFile(){
-
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
         startActivityForResult(intent, READ_REQUEST_CODE);
@@ -76,36 +98,9 @@ public class UploadFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-
             // Check if the data selected is valid.
             if(data != null){
-                // Set ui to show file loading.
-                loadingMode();
-                // Get a copy of the file on a seperate thread to not lockup the ui.
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Uri uri = data.getData();
-
-                        Pair<String, String> pair = FileHelper.getNameandSize(uri, getActivity());
-
-                        String fName = pair.first;
-                        String fSize = pair.second;
-
-                        fileName.setText(fName);
-                        fileSize.setText(fSize);
-
-                        File fileCopy = FileHelper.getFileFromURI(uri, getActivity());
-                        // Run the change UI on the UI thread.
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                uploadMode();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                copyFileForUpload(data);
             }
         }
     }
@@ -124,11 +119,12 @@ public class UploadFragment extends Fragment {
         loadingBar.setVisibility(View.INVISIBLE);
     }
 
+    // Sets the screen to the loading mode.
     private void loadingMode(){
         clickToSelectFile.setVisibility(View.INVISIBLE);
         selectedFileLayout.setVisibility(View.VISIBLE);
         uploadingChart.setVisibility(View.INVISIBLE);
-        fileStatus.setText("FILE LOADING");
+        fileStatus.setText("WAITING FOR FILE TO LOAD");
         removeFile.setVisibility(View.VISIBLE);
         loadingBar.setVisibility(View.VISIBLE);
     }
@@ -157,7 +153,6 @@ public class UploadFragment extends Fragment {
         loadingBar = getView().findViewById(R.id.upload_loadingBar);
         fileStatus = getView().findViewById(R.id.upload_statusBarTitle);
 
-
         // Set bar colour
         uploadingChart.setPercentageBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         // Set inner colour to white
@@ -167,7 +162,7 @@ public class UploadFragment extends Fragment {
         // Set the font size
         uploadingChart.setPercentageTextSize(13);
         // Set the percentage
-        uploadingChart.setPercentage(0);
+        uploadingChart.setPercentage(1);
         // Set inner text
         uploadingChart.setInnerText("0%");
     }

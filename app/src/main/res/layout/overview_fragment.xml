@@ -64,13 +64,12 @@
             android:text="Cloud Storage"
             android:textAlignment="center"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/cloudStoragePieChart"
             app:layout_constraintEnd_toEndOf="@+id/cloudStoragePieChart"
             app:layout_constraintStart_toStartOf="@+id/cloudStoragePieChart"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.63" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <az.plainpie.PieView
             android:id="@+id/localStoragePieChart"
@@ -100,7 +99,7 @@
             android:text="Local Storage"
             android:textAlignment="center"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/localStoragePieChart"
             app:layout_constraintEnd_toEndOf="@+id/localStoragePieChart"
