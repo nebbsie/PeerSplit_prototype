@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -52,8 +53,8 @@ public class RegisterController extends Activity {
     private void registerUser(){
         boolean attemptLogin = true;
         final String usernameStr = username.getText().toString();
-        String emailStr = email.getText().toString();
-        String passwordStr = password.getText().toString();
+        final String emailStr = email.getText().toString();
+        final String passwordStr = password.getText().toString();
         String passwordAgainStr = passwordAgain.getText().toString();
 
         // Check if the username is empty.
@@ -87,11 +88,11 @@ public class RegisterController extends Activity {
                             // User registered.
                             if (task.isSuccessful()) {
                                 UserManager.user = UserManager.authentication.getCurrentUser();
-
                                 // Set users username
                                 UserProfileChangeRequest pUpdater = new UserProfileChangeRequest.Builder().setDisplayName(usernameStr).build();
                                 UserManager.user.updateProfile(pUpdater);
                                 Toast.makeText(RegisterController.this,"Created New User Account!", Toast.LENGTH_SHORT).show();
+                                SettingsHelper.setLoginDetails(emailStr, passwordStr);
                             } else {
                                 Toast.makeText(RegisterController.this,"Failed To Register User Account!", Toast.LENGTH_SHORT).show();
                             }

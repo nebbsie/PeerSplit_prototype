@@ -35,6 +35,17 @@ public class HomeController extends FragmentActivity implements Serializable {
     private SettingsFragment settingsActivity;
 
 
+    @Override
+    protected void onStop() {
+        if(profileActivity.created){
+            profileActivity.onStop();
+        }
+        if(settingsActivity.created){
+            settingsActivity.onStop();
+        }
+        super.onStop();
+    }
+
     // Called when the page is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,7 +1,9 @@
 package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
@@ -19,13 +21,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Set;
+
 public class LoginController extends Activity {
 
     private EditText username;
     private EditText password;
     private Button loginButton;
-    private String usernameStr = "nebbsie@gmail.com";
-    private String passwordStr = "Bellamy1995";
+    private String usernameStr;
+    private String passwordStr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +37,17 @@ public class LoginController extends Activity {
         setContentView(R.layout.login_activity);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setupUI();
+
+        SettingsHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
+
         UserManager.setup();
         SettingsHelper.setup();
 
+
+
         if(SettingsHelper.AUTO_LOGIN){
+            usernameStr = SettingsHelper.getEmail();
+            passwordStr = SettingsHelper.getPassword();
             attemptLogin();
         }
     }
@@ -73,6 +84,7 @@ public class LoginController extends Activity {
                             if (task.isSuccessful()) {
                                 UserManager.user = UserManager.authentication.getCurrentUser();
                                 Toast.makeText(LoginController.this, "Username: " + UserManager.user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                                SettingsHelper.setLoginDetails(usernameStr, passwordStr);
                                 Intent i = new Intent(getApplication(), HomeController.class);
                                 startActivity(i);
                             } else {
