@@ -9,6 +9,6 @@ public class SettingsHelper {
     public static boolean AUTO_LOGIN;
 
     public static void setup(){
-        AUTO_LOGIN = false;
+        AUTO_LOGIN = true;
     }
 }
