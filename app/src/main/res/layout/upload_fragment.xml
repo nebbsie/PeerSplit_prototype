@@ -63,7 +63,6 @@
             android:background="@color/backgroundColour"
             android:gravity="center_vertical"
             android:paddingLeft="20dp"
-            android:text="lorem_ipsum.mp4"
             android:textAlignment="viewStart"
             android:textAllCaps="false"
             android:textColor="@color/colorPrimaryDark"
@@ -89,20 +88,21 @@
             android:background="@color/backgroundColour"
             android:gravity="center_vertical"
             android:paddingLeft="20dp"
-            android:text="456.98 MB"
             android:textAlignment="viewStart"
             android:textAllCaps="false"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/upload_statusBarTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="30dp"
             android:text="FILE UPLOADING"
             android:textAlignment="center"
             android:textColor="@color/colorPrimaryDark"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="visible" />
 
         <az.plainpie.PieView
             android:id="@+id/fileUploadingPieChart"
@@ -110,6 +110,7 @@
             android:layout_height="120dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
+            android:visibility="visible"
             plainpie:inner_pie_padding="30"
             plainpie:inner_text_visibility="true"
             plainpie:percentage="75"
@@ -166,5 +167,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textView6"
         app:layout_constraintVertical_bias="0.62" />
+
+    <ProgressBar
+        android:id="@+id/upload_loadingBar"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/fileSelectedBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/clickToSelectFileButton"
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>

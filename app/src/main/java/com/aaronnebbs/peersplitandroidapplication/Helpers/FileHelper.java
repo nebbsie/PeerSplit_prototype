@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.util.Pair;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,16 +15,36 @@ import java.io.InputStream;
 
 public class FileHelper {
 
+    public static Pair<String,String> getNameandSize(Uri uri, Activity activity){
+        Cursor returnCursor = activity.getContentResolver().query(uri, null, null, null, null);
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+        System.out.println(returnCursor.getString(nameIndex));
+        return new Pair<>(returnCursor.getString(nameIndex), getFileSizeString(returnCursor.getLong(sizeIndex)));
+    }
+
     // Returns a pretty string with correct initial at the end depending on file size.
     public static String getFileSizeString(File file){
         long bytes = file.length();
         // Check if MB should be the output.
         if(bytes > 1000000 && bytes < 1e+9){
-            return String.valueOf(getFileSizeInMB(bytes)) + " MB";
+            return Long.toString(getFileSizeInMB(bytes)) + " MB";
         } else if(bytes > 1e+9){ // Check if GB should be the output.
-            return String.valueOf(getFileSizeInGB(bytes)) + " GB";
+            return Long.toString(getFileSizeInGB(bytes)) + " GB";
         } else{ // Check if KB should be the output.
-            return String.valueOf(getFileSizeInKB(bytes)) + " KB";
+            return Long.toString(getFileSizeInKB(bytes)) + " KB";
+        }
+    }
+    // Returns a pretty string with correct initial at the end depending on file size.
+    public static String getFileSizeString(long bytes){
+        // Check if MB should be the output.
+        if(bytes > 1000000 && bytes < 1e+9){
+            return Long.toString(getFileSizeInMB(bytes)) + " MB";
+        } else if(bytes > 1e+9){ // Check if GB should be the output.
+            return Long.toString(getFileSizeInGB(bytes)) + " GB";
+        } else{ // Check if KB should be the output.
+            return Long.toString(getFileSizeInKB(bytes)) + " KB";
         }
     }
 
