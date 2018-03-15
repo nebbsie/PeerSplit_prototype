@@ -95,12 +95,9 @@ public class UploadController extends Activity {
 
                 File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
                 ArrayList<ChunkFile> files = FileHelper.splitFileIntoChunks(fileCopy, UploadController.this);
-                try {
-                    System.out.println(files.get(0).getName());
-                    FileHelper.merge(files.get(0).getName(), UploadController.this);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                String res = FileHelper.merge(files.get(0).getLocation(), UploadController.this);
+                System.out.println(res);
+
                 // Run the change UI on the UI thread.
                 runOnUiThread(new Runnable() {
                     @Override

@@ -29,6 +29,8 @@ import java.util.List;
 
 public class FileHelper {
 
+
+    // Splits a file into chunks and returns an array with the files.
     public static ArrayList<ChunkFile> splitFileIntoChunks(File file, Activity activity){
         // Array list of all chunks.
         ArrayList<ChunkFile> files = new ArrayList<>();
@@ -52,6 +54,9 @@ public class FileHelper {
         new File(outputLocation).mkdirs();
         System.out.println("Splitting: " + fileName);
         System.out.println("Chunk Size: " + chunkSize / 1024 + " KB");
+
+        System.out.println(chunkLocation);
+
         try{
             int byteData;
             FileInputStream fis = new FileInputStream(baseFile);
@@ -63,7 +68,7 @@ public class FileHelper {
                 // Create file name for chunk.
                 String chunkName = String.format("%s.%03d", fileName, chunkCounter);
                 // Make a new file for the chunk.
-                ChunkFile chunk = new ChunkFile(new File(chunkLocation, chunkName), fileName);
+                ChunkFile chunk = new ChunkFile(new File(chunkLocation, chunkName), chunkLocation);
                 // Write the data to the new file.
                 FileOutputStream out = new FileOutputStream(chunk.getFile());
                 out.write(dataBuffer,0,byteData);
@@ -82,25 +87,14 @@ public class FileHelper {
         return files;
     }
 
-    public static List<File> getFilesToMerge(String location, Activity activity){
-
-        File myDir = activity.getFilesDir();
-        String loc = myDir.getPath() + "/" + location + "_data/chunks";
-
-        System.out.println("LOCATION: " + loc);
-       // String chunkLocation = baseFile.getParent()+"/"+fileName+"_data"+"/chunks";
-
-        File[] files = new File(loc).listFiles();
-        System.out.println("Found " + files.length + " chunks to merge.");
-        Arrays.sort(files);
-        return Arrays.asList(files);
-    }
 
     // Merge the files into one output file.
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static String merge(String name, Activity activity) throws IOException {
+    public static String merge(String name, Activity activity) {
+
         // Get the files to merge.
-        List<File> files = getFilesToMerge(name, activity);
+        File[] chunks = new File(name).listFiles();
+        Arrays.sort(chunks);
+        List<File> files = Arrays.asList(chunks);
         // Return error message if no chunks are found.
         if(files.size() == 0){
             return "No chunks found!";
@@ -118,16 +112,25 @@ public class FileHelper {
         File outputFile = new File( path + outputFileName);
         int sizeOfMerge = 0;
         // Merge the files.
-        try (FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
-             BufferedOutputStream fileOut = new BufferedOutputStream(fileOutputStream)) {
+
+        FileOutputStream fos = null;
+        BufferedOutputStream fileOut = null;
+        try {
+            fos = new FileOutputStream(outputFile);
+            fileOut = new BufferedOutputStream(fos);
             for (File f : files) {
                 RandomAccessFile fl = new RandomAccessFile(f, "r");
-                byte[] b = new byte[(int)f.length()];
+                byte[] b = new byte[(int) f.length()];
                 fl.readFully(b);
                 fileOut.write(b);
                 sizeOfMerge += f.length();
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
         return "Merged " + files.size() + " file/s  Totaling: " + (sizeOfMerge / 1048576) + " MB";
     }
 
