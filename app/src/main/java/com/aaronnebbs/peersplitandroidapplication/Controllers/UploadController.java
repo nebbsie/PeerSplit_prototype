@@ -3,7 +3,9 @@ package com.aaronnebbs.peersplitandroidapplication.Controllers;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
@@ -16,9 +18,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 
 import az.plainpie.PieView;
 
@@ -79,6 +85,7 @@ public class UploadController extends Activity {
         loadingMode();
         // Get a copy of the file on a seperate thread to not lockup the ui.
         Thread thread = new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void run() {
                 Uri uri = data.getData();
@@ -87,6 +94,13 @@ public class UploadController extends Activity {
                 fileSize.setText(pair.second);
 
                 File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
+                ArrayList<ChunkFile> files = FileHelper.splitFileIntoChunks(fileCopy, UploadController.this);
+                try {
+                    System.out.println(files.get(0).getName());
+                    FileHelper.merge(files.get(0).getName(), UploadController.this);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 // Run the change UI on the UI thread.
                 runOnUiThread(new Runnable() {
                     @Override
