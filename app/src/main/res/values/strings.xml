@@ -9,7 +9,7 @@
     <string name="signup">SIGN UP</string>
 
     <!-- Multi Use -->
-    <string name="textField_username_hint">username</string>
+    <string name="textField_username_hint">email</string>
     <string name="textField_password_hint">password</string>
     <string name="textField_passwordAgain_hint">password again</string>
     <string name="textField_email_hint">email</string>

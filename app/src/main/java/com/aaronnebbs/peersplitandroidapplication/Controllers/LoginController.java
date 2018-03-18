@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
+import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -79,8 +80,14 @@ public class LoginController extends Activity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                // Set the firebase user information.
                                 UserManager.user = UserManager.authentication.getCurrentUser();
+                                // Set shared preferences.
                                 SettingsHelper.setLoginDetails(usernameStr, passwordStr);
+                                // Set the user information that is put into the database.
+                                // TODO: make this read shared pref.
+                                UserManager.userAccount = new User(UserManager.user.getDisplayName(), 1024, true, true);
+                                // Start the next page.
                                 Intent i = new Intent(getApplication(), HomeController.class);
                                 startActivity(i);
                             } else {

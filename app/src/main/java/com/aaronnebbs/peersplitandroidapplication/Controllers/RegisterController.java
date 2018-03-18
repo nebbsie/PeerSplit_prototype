@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
+import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -91,6 +92,11 @@ public class RegisterController extends Activity {
                                 // Set users username
                                 UserProfileChangeRequest pUpdater = new UserProfileChangeRequest.Builder().setDisplayName(usernameStr).build();
                                 UserManager.user.updateProfile(pUpdater);
+                                // Create the local account to store information to update the user in firebase database.
+                                UserManager.userAccount = new User(usernameStr, 1024, true, false);
+                                // Creates a user in firebase database.
+                                UserManager.createUser();
+                                // Go to next screen.
                                 Toast.makeText(RegisterController.this,"Created New User Account!", Toast.LENGTH_SHORT).show();
                                 SettingsHelper.setLoginDetails(emailStr, passwordStr);
                             } else {
