@@ -48,12 +48,12 @@ public class BackgroundService extends Service {
         database = FirebaseDatabase.getInstance();
         userDatabaseReference = database.getReference("users");
 
-        final String uid = intent.getExtras().getString("uid");
         final Handler handler = new Handler();
         final int delay = 5000;
 
         handler.postDelayed(new Runnable(){
             public void run(){
+                //System.out.println("WHY");
                 userDatabaseReference.child("/tests/").push().setValue("yo! + " + new Date().getTime());
                 handler.postDelayed(this, delay);
             }

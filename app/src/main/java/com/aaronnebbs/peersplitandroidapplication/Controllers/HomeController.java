@@ -49,8 +49,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
-        System.out.println("CREEATED HOME PAGE");
-
         firstTime = true;
         homeActivity = new HomeFragment();
         overviewActivity = new OverviewFragment();
@@ -126,6 +124,7 @@ public class HomeController extends FragmentActivity implements Serializable {
     protected void onResume() {
         super.onResume();
         this.overridePendingTransition(R.anim.push_down_in, R.anim.push_down_out);
+        UserManager.loggedIn = true;
     }
 
     // Setup the look and feel of the bottom navigation bar.
@@ -149,8 +148,6 @@ public class HomeController extends FragmentActivity implements Serializable {
     @Override
     protected void onDestroy() {
         System.out.println("on destroy");
-
-
 
         super.onDestroy();
     }

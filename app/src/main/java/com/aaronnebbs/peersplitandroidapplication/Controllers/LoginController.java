@@ -133,9 +133,14 @@ public class LoginController extends Activity {
     protected void onDestroy() {
         System.out.println("on destroy login");
 
-        Intent serviceIntent = new Intent(this,BackgroundService.class);
-        serviceIntent.putExtra("uid", UserManager.user.getUid());
-        startService(serviceIntent);
+        // Only run the background task if you have logged in.
+        if(UserManager.loggedIn){
+//            Intent serviceIntent = new Intent(this,BackgroundService.class);
+//            serviceIntent.putExtra("uid", UserManager.user.getUid());
+//            stopService(serviceIntent);
+//            startService(serviceIntent);
+
+        }
 
         super.onDestroy();
     }

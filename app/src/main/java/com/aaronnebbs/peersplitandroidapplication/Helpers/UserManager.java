@@ -20,6 +20,7 @@ public class UserManager {
     public static FirebaseDatabase database;
     public static DatabaseReference userDatabaseReference;
     public static User userAccount;
+    public static boolean loggedIn = false;
 
     // Setup the static variables.
     public static void setup(){
@@ -43,6 +44,7 @@ public class UserManager {
     public static void setupStillOnlineHandler(final Activity act){
         final Handler handler = new Handler();
         final int delay = 10000;
+        System.out.println("Created A Listener");
 
         handler.postDelayed(new Runnable(){
             public void run(){

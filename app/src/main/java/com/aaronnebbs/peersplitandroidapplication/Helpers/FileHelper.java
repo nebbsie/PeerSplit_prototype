@@ -3,13 +3,9 @@ package com.aaronnebbs.peersplitandroidapplication.Helpers;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.OpenableColumns;
-import android.support.annotation.RequiresApi;
 import android.util.Pair;
-
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -19,16 +15,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class FileHelper {
-
 
     // Splits a file into chunks and returns an array with the files.
     public static ArrayList<ChunkFile> splitFileIntoChunks(File file, Activity activity){
@@ -54,9 +45,7 @@ public class FileHelper {
         new File(outputLocation).mkdirs();
         System.out.println("Splitting: " + fileName);
         System.out.println("Chunk Size: " + chunkSize / 1024 + " KB");
-
         System.out.println(chunkLocation);
-
         try{
             int byteData;
             FileInputStream fis = new FileInputStream(baseFile);
@@ -90,7 +79,6 @@ public class FileHelper {
 
     // Merge the files into one output file.
     public static String merge(String name, Activity activity) {
-
         // Get the files to merge.
         File[] chunks = new File(name).listFiles();
         Arrays.sort(chunks);
@@ -130,10 +118,8 @@ public class FileHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return "Merged " + files.size() + " file/s  Totaling: " + (sizeOfMerge / 1048576) + " MB";
     }
-
 
     private static int getSizeOfChunk(long size){
         //TODO: set device number to a number of phones availible.
@@ -144,6 +130,7 @@ public class FileHelper {
         return autoSizeRounded;
     }
 
+    // Round number to the nearest power of two.
     private static int roundUpToNearestPowerOfTwo(long in){
         long num = in;
         num --;

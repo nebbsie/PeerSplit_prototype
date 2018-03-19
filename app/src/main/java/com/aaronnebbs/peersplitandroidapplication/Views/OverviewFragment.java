@@ -68,6 +68,7 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        System.out.println("YO RESUMING NOW");
     }
 
     @Override
