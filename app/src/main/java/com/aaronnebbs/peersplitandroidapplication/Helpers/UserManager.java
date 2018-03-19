@@ -1,7 +1,9 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Handler;
+import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.Views.SettingsFragment;
@@ -44,6 +46,7 @@ public class UserManager {
 
         handler.postDelayed(new Runnable(){
             public void run(){
+                System.out.println("In Application");
                 // Reload the data used for an update.
                 SettingsHelper.setup();
                 ConnectivityHelper.canUploadChunk(act);

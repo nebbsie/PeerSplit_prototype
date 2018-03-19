@@ -2,6 +2,7 @@ package com.aaronnebbs.peersplitandroidapplication.Views;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
+import com.google.firebase.auth.AuthCredential;
 
 public class SettingsFragment extends Fragment {
 

@@ -20,6 +20,7 @@
         <activity android:name=".Controllers.HomeController" />
         <activity android:name=".Controllers.UploadController" />
         <activity android:name=".Controllers.WelcomeController"></activity>
+        <service android:name=".Controllers.BackgroundService" android:exported="false" />
     </application>
 
 </manifest>

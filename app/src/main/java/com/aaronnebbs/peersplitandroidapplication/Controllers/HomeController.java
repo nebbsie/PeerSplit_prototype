@@ -8,13 +8,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
-
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.aaronnebbs.peersplitandroidapplication.Views.HomeFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.OverviewFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.ProfileFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.SettingsFragment;
+import com.google.gson.Gson;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
 
@@ -48,6 +48,8 @@ public class HomeController extends FragmentActivity implements Serializable {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
+
+        System.out.println("CREEATED HOME PAGE");
 
         firstTime = true;
         homeActivity = new HomeFragment();
@@ -144,6 +146,14 @@ public class HomeController extends FragmentActivity implements Serializable {
         navBar.getIconAt(4).setPadding(0, 25, 0, 0);
     }
 
+    @Override
+    protected void onDestroy() {
+        System.out.println("on destroy");
+
+
+
+        super.onDestroy();
+    }
 }
 
 

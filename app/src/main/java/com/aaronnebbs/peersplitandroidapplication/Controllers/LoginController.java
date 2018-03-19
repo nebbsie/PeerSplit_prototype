@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
 
 import java.util.Set;
 
@@ -37,6 +39,7 @@ public class LoginController extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
         // Setup the user interface.
         setupUI();
         // Setup the shared preferences.
@@ -124,5 +127,16 @@ public class LoginController extends Activity {
                 attemptLogin();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.out.println("on destroy login");
+
+        Intent serviceIntent = new Intent(this,BackgroundService.class);
+        serviceIntent.putExtra("uid", UserManager.user.getUid());
+        startService(serviceIntent);
+
+        super.onDestroy();
     }
 }

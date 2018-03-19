@@ -35,15 +35,21 @@ public class ConnectivityHelper {
 
     // Checks if the phone is allowed to upload.
     public static boolean canUploadChunk(Activity act){
-        checkWifi(act);
-        if(USING_WIFI){
-            CAN_UPLOAD = true;
-            return true;
-        }else if (USING_MOBILE && SettingsHelper.getMobileNetwork()){
-            CAN_UPLOAD = true;
-            return true;
-        }else{
-            return false;
+
+        try{
+            checkWifi(act);
+            if(USING_WIFI){
+                CAN_UPLOAD = true;
+                return true;
+            }else if (USING_MOBILE && SettingsHelper.getMobileNetwork()){
+                CAN_UPLOAD = true;
+                return true;
+            }else{
+                return false;
+            }
+        }catch (NullPointerException e){
+            e.printStackTrace();
+            return CAN_UPLOAD;
         }
     }
 }
