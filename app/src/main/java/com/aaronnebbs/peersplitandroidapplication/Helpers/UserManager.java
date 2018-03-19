@@ -1,6 +1,7 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -24,7 +25,7 @@ public class UserManager {
     public static void createUser(){
         userDatabaseReference.child(user.getUid()).setValue(userAccount);
     }
-
+    // Currently the same as create as create does update, change this to only update what is necessary.
     public static void updateUser(){
         userDatabaseReference.child(user.getUid()).setValue(userAccount);
     }

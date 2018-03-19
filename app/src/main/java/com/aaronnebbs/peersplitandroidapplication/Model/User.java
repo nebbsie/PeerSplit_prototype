@@ -1,19 +1,24 @@
 package com.aaronnebbs.peersplitandroidapplication.Model;
 
 
+import java.time.Instant;
+import java.util.Date;
+
 public class User {
     private String username;
-    private int deviceStorageAllocation;
+    private float deviceStorageAllocation;
     private boolean allowsDeviceStorage;
     private boolean allowsMobileNetwork;
-    private boolean online;
+    private long lastOnline;
+    private Date date;
 
-    public User(String username, int deviceStorageAllocation, boolean allowsDeviceStorage, boolean allowsMobileNetwork){
+    public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, boolean allowsMobileNetwork){
+        date = new Date();
         this.username = username;
         this.deviceStorageAllocation = deviceStorageAllocation;
         this.allowsDeviceStorage = allowsDeviceStorage;
         this.allowsMobileNetwork = allowsMobileNetwork;
-        this.online = true;
+        this.lastOnline = date.getTime();
     }
 
     public String getUsername() {
@@ -24,11 +29,11 @@ public class User {
         this.username = username;
     }
 
-    public int getDeviceStorageAllocation() {
+    public float getDeviceStorageAllocation() {
         return deviceStorageAllocation;
     }
 
-    public void setDeviceStorageAllocation(int deviceStorageAllocation) {
+    public void setDeviceStorageAllocation(float deviceStorageAllocation) {
         this.deviceStorageAllocation = deviceStorageAllocation;
     }
 
@@ -48,11 +53,12 @@ public class User {
         this.allowsMobileNetwork = allowsMobileNetwork;
     }
 
-    public boolean isOnline() {
-        return online;
+    public long getLastOnline() {
+        return lastOnline;
     }
 
-    public void setOnline(boolean online) {
-        this.online = online;
+    public void  updateTime(){
+        this.lastOnline =  date.getTime();
     }
+
 }

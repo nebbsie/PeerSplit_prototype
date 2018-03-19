@@ -37,12 +37,16 @@ public class LoginController extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        // Setup the user interface.
         setupUI();
-
+        // Setup the shared preferences.
         SettingsHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
+        // Setup the database links and also user.
         UserManager.setup();
+        // Load values from the share preferences.
         SettingsHelper.setup();
 
+        // Check if the application needs to auto login.
         if(SettingsHelper.AUTO_LOGIN){
             usernameStr = SettingsHelper.getEmail();
             passwordStr = SettingsHelper.getPassword();
@@ -85,13 +89,15 @@ public class LoginController extends Activity {
                                 // Set shared preferences.
                                 SettingsHelper.setLoginDetails(usernameStr, passwordStr);
                                 // Set the user information that is put into the database.
-                                // TODO: make this read shared pref.
-                                UserManager.userAccount = new User(UserManager.user.getDisplayName(), 1024, true, true);
+                                UserManager.userAccount = new User(UserManager.user.getDisplayName(), SettingsHelper.getStorageAmount(), SettingsHelper.getChunkStorage(), SettingsHelper.getMobileNetwork());
+                                // Updates the user information in the firebase app, mainly for the update of time.
+                                // Used to check if a user is still online.
+                                UserManager.updateUser();
                                 // Start the next page.
                                 Intent i = new Intent(getApplication(), HomeController.class);
                                 startActivity(i);
                             } else {
-                                Toast.makeText(LoginController.this, "Failed To Signin!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginController.this, "Failed To Sign in!", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });

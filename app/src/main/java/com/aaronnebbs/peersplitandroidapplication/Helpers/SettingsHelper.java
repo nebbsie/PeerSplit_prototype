@@ -7,12 +7,16 @@ public class SettingsHelper {
 
     public static SharedPreferences prefs;
 
-    private final static String AUTOLOGIN = "AUTOLOGIN";
-    private final static String CHUNKSTORAGE = "CHUNKSTORAGE";
-    private final static String MOBILENETWORK = "MOBILENETWORK";
-    private final static String STORAGEAMOUNT = "STORAGEAMOUNT";
-    private final static String EMAILSTR = "EMAIL";
-    private final static String PASSWORDSTR = "PASSWORD";
+    private static final int DEFAULT_ALLOCATION = 1024;
+    private static final boolean DEFAULT_NETWORK = false;
+    private static final boolean DEAFULT_STORAGE = true;
+
+    private static final String AUTOLOGIN = "AUTOLOGIN";
+    private static final String CHUNKSTORAGE = "CHUNKSTORAGE";
+    private static final String MOBILENETWORK = "MOBILENETWORK";
+    private static final String STORAGEAMOUNT = "STORAGEAMOUNT";
+    private static final String EMAILSTR = "EMAIL";
+    private static final String PASSWORDSTR = "PASSWORD";
 
     public static boolean AUTO_LOGIN;
     public static boolean CHUNK_STORAGE;
@@ -87,4 +91,17 @@ public class SettingsHelper {
         PASSWORD = prefs.getString(PASSWORDSTR, "");
         return PASSWORD;
     }
+
+    public static int getDefaultAllocation() {
+        return DEFAULT_ALLOCATION;
+    }
+
+    public static boolean getDefaultNetwork() {
+        return DEFAULT_NETWORK;
+    }
+
+    public static boolean getDeafultStorage() {
+        return DEAFULT_STORAGE;
+    }
+
 }

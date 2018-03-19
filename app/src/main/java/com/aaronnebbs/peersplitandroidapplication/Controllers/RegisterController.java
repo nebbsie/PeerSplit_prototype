@@ -93,8 +93,8 @@ public class RegisterController extends Activity {
                                 UserProfileChangeRequest pUpdater = new UserProfileChangeRequest.Builder().setDisplayName(usernameStr).build();
                                 UserManager.user.updateProfile(pUpdater);
                                 // Create the local account to store information to update the user in firebase database.
-                                UserManager.userAccount = new User(usernameStr, 1024, true, false);
-                                // Creates a user in firebase database.
+                                UserManager.userAccount = new User(usernameStr, SettingsHelper.getDefaultAllocation(), SettingsHelper.getDeafultStorage(), SettingsHelper.getDefaultNetwork());
+                                // Creates a user in firebase database using the local account.
                                 UserManager.createUser();
                                 // Go to next screen.
                                 Toast.makeText(RegisterController.this,"Created New User Account!", Toast.LENGTH_SHORT).show();
