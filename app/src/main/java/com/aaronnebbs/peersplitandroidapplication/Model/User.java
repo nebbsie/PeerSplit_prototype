@@ -1,24 +1,27 @@
 package com.aaronnebbs.peersplitandroidapplication.Model;
 
+import android.app.Activity;
 
-import java.time.Instant;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ConnectivityHelper;
+
 import java.util.Date;
 
 public class User {
     private String username;
     private float deviceStorageAllocation;
     private boolean allowsDeviceStorage;
-    private boolean allowsMobileNetwork;
-    private long lastOnline;
-    private Date date;
 
-    public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, boolean allowsMobileNetwork){
-        date = new Date();
+
+    private boolean canTransmitData;
+    private long lastOnline;
+
+
+    public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, Activity act){
         this.username = username;
         this.deviceStorageAllocation = deviceStorageAllocation;
         this.allowsDeviceStorage = allowsDeviceStorage;
-        this.allowsMobileNetwork = allowsMobileNetwork;
-        this.lastOnline = date.getTime();
+        this.canTransmitData = ConnectivityHelper.canUploadChunk(act);
+        this.lastOnline = new Date().getTime();
     }
 
     public String getUsername() {
@@ -45,12 +48,12 @@ public class User {
         this.allowsDeviceStorage = allowsDeviceStorage;
     }
 
-    public boolean isAllowsMobileNetwork() {
-        return allowsMobileNetwork;
+    public boolean isCanTransmitData() {
+        return canTransmitData;
     }
 
-    public void setAllowsMobileNetwork(boolean allowsMobileNetwork) {
-        this.allowsMobileNetwork = allowsMobileNetwork;
+    public void setCanTransmitData(boolean canTransmitData) {
+        this.canTransmitData = canTransmitData;
     }
 
     public long getLastOnline() {
@@ -58,7 +61,7 @@ public class User {
     }
 
     public void  updateTime(){
-        this.lastOnline =  date.getTime();
+        this.lastOnline =  new Date().getTime();
     }
 
 }

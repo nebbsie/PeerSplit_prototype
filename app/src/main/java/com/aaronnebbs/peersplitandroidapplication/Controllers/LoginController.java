@@ -89,7 +89,7 @@ public class LoginController extends Activity {
                                 // Set shared preferences.
                                 SettingsHelper.setLoginDetails(usernameStr, passwordStr);
                                 // Set the user information that is put into the database.
-                                UserManager.userAccount = new User(UserManager.user.getDisplayName(), SettingsHelper.getStorageAmount(), SettingsHelper.getChunkStorage(), SettingsHelper.getMobileNetwork());
+                                UserManager.userAccount = new User(UserManager.user.getDisplayName(), SettingsHelper.getStorageAmount(), SettingsHelper.getChunkStorage(), LoginController.this);
                                 // Updates the user information in the firebase app, mainly for the update of time.
                                 // Used to check if a user is still online.
                                 UserManager.updateUser();

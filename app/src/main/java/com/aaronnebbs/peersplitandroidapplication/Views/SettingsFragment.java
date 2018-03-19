@@ -11,7 +11,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.ToggleButton;
+
+import com.aaronnebbs.peersplitandroidapplication.Controllers.HomeController;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
 public class SettingsFragment extends Fragment {
@@ -55,6 +59,11 @@ public class SettingsFragment extends Fragment {
         if(SettingsHelper.STORAGE_AMOUNT != Float.parseFloat(storageAllocation.getText().toString())){
             SettingsHelper.setStorageAmount(Float.parseFloat(storageAllocation.getText().toString()));
         }
+
+        // Update if the user can still upload data.
+        ConnectivityHelper.canUploadChunk(getActivity());
+        // Update the user in the cloud
+        UserManager.updateUser();
     }
 
     private void setupUI(){

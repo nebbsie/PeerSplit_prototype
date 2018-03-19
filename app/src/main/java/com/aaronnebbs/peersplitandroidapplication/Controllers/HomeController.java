@@ -9,6 +9,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.aaronnebbs.peersplitandroidapplication.Views.HomeFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.OverviewFragment;
@@ -55,6 +56,9 @@ public class HomeController extends FragmentActivity implements Serializable {
         settingsActivity = new SettingsFragment();
 
         setupNavBar();
+
+        // Setup a handler that every n seconds updates the database.
+        UserManager.setupStillOnlineHandler(this);
 
         // Setup the onclick listener for the bottom
         navBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {

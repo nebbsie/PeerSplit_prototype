@@ -10,6 +10,9 @@ public class ConnectivityHelper {
 
     private static boolean USING_WIFI;
     private static boolean USING_MOBILE;
+    public static boolean CAN_UPLOAD;
+
+
 
     // Checks if the phone is using wifi or mobile networking.
     public static void checkWifi(Activity act){
@@ -19,6 +22,7 @@ public class ConnectivityHelper {
 
         USING_WIFI = false;
         USING_MOBILE = false;
+        CAN_UPLOAD = false;
 
         if(wifi.isConnectedOrConnecting()){
             // Connected to wifi
@@ -30,10 +34,13 @@ public class ConnectivityHelper {
     }
 
     // Checks if the phone is allowed to upload.
-    public static boolean canUploadChunk(){
+    public static boolean canUploadChunk(Activity act){
+        checkWifi(act);
         if(USING_WIFI){
+            CAN_UPLOAD = true;
             return true;
         }else if (USING_MOBILE && SettingsHelper.getMobileNetwork()){
+            CAN_UPLOAD = true;
             return true;
         }else{
             return false;
