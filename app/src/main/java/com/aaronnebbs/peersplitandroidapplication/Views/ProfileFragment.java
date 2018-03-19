@@ -1,5 +1,6 @@
 package com.aaronnebbs.peersplitandroidapplication.Views;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.aaronnebbs.peersplitandroidapplication.Controllers.LoginController;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
+import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
@@ -54,6 +57,8 @@ public class ProfileFragment extends Fragment {
             UserProfileChangeRequest pUpdater = new UserProfileChangeRequest.Builder().setDisplayName(username.getText().toString()).build();
             UserManager.user.updateProfile(pUpdater);
         }
+
+        UserManager.updateUser();
     }
 
     @Override
@@ -69,5 +74,10 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if(UserManager.user == null){
+            Intent i = new Intent(getContext(), LoginController.class);
+            startActivity(i);
+        }
+        System.out.println("her");
     }
 }

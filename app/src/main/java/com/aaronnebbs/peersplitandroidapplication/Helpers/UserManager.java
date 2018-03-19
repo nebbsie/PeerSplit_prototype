@@ -34,6 +34,7 @@ public class UserManager {
     }
     // Currently the same as create as create does update, change this to only update what is necessary.
     public static void updateUser(){
+        userAccount.setUsername(UserManager.user.getDisplayName());
         userAccount.setAllowsDeviceStorage(SettingsHelper.getChunkStorage());
         userAccount.setDeviceStorageAllocation(SettingsHelper.getStorageAmount());
         userAccount.setCanTransmitData(ConnectivityHelper.CAN_UPLOAD);

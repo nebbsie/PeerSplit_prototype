@@ -48,7 +48,7 @@ public class ConnectivityHelper {
                 return false;
             }
         }catch (NullPointerException e){
-            e.printStackTrace();
+            System.out.println("Tired doing network check! Failed!");
             return CAN_UPLOAD;
         }
     }

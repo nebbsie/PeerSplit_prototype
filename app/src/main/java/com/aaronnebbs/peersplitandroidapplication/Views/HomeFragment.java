@@ -35,10 +35,10 @@ public class HomeFragment extends Fragment {
 
         dataModels.add(new HomePageRow("aar.mp4", "500gb"));
         dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.jpg", "500gb"));
         dataModels.add(new HomePageRow("aar.mp4", "500gb"));
         dataModels.add(new HomePageRow("aar.mp4", "500gb"));
-        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
-        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
+        dataModels.add(new HomePageRow("aar.txt", "500gb"));
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
