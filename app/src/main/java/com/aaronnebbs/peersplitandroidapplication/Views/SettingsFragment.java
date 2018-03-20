@@ -1,8 +1,6 @@
 package com.aaronnebbs.peersplitandroidapplication.Views;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
@@ -11,14 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
-import android.widget.ToggleButton;
 
-import com.aaronnebbs.peersplitandroidapplication.Controllers.HomeController;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.ConnectivityHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
-import com.google.firebase.auth.AuthCredential;
 
 public class SettingsFragment extends Fragment {
 

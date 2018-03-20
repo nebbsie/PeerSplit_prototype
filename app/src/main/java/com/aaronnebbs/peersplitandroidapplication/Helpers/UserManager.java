@@ -1,13 +1,10 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Handler;
-import android.widget.Toast;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
-import com.aaronnebbs.peersplitandroidapplication.Views.SettingsFragment;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -45,14 +42,14 @@ public class UserManager {
     public static void setupStillOnlineHandler(final Activity act){
         final Handler handler = new Handler();
         final int delay = 10000;
-        System.out.println("Created A Listener");
 
         handler.postDelayed(new Runnable(){
             public void run(){
-                System.out.println("In Application");
+                System.out.println("Updated Firebase: " + user.getUid() + "  " + userAccount.getUsername());
                 // Reload the data used for an update.
                 SettingsHelper.setup();
-                ConnectivityHelper.canUploadChunk(act);
+                // Check if the user can upload chu
+                ConnectivityHelper.update(act);
                 updateUser();
                 handler.postDelayed(this, delay);
             }

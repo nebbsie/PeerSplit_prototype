@@ -2,7 +2,7 @@ package com.aaronnebbs.peersplitandroidapplication.Model;
 
 import android.app.Activity;
 
-import com.aaronnebbs.peersplitandroidapplication.Helpers.ConnectivityHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 
 import java.util.Date;
 
@@ -10,10 +10,9 @@ public class User {
     private String username;
     private float deviceStorageAllocation;
     private boolean allowsDeviceStorage;
-
-
     private boolean canTransmitData;
     private long lastOnline;
+    private String ip;
 
 
     public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, Activity act){
@@ -22,6 +21,15 @@ public class User {
         this.allowsDeviceStorage = allowsDeviceStorage;
         this.canTransmitData = ConnectivityHelper.canUploadChunk(act);
         this.lastOnline = new Date().getTime();
+        this.ip = ConnectivityHelper.getPublicIPAddress();
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public String getUsername() {
