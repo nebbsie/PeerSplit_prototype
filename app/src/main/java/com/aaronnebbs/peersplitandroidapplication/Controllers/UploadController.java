@@ -3,15 +3,9 @@ package com.aaronnebbs.peersplitandroidapplication.Controllers;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -19,11 +13,11 @@ import android.widget.TextView;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
+import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 
 import az.plainpie.PieView;
@@ -78,6 +72,26 @@ public class UploadController extends Activity {
         });
     }
 
+    // Attempt to compress file.
+    private File compressFile(File fileCopy){
+        try {
+            File f = FileHelper.compress(fileCopy, new File(fileCopy + "_data/compressed/" + fileCopy.getName() + ".gz"));
+            fileCopy.delete();
+            return f;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Attempt to compress file.
+    private void decompressFile(File fileCopy){
+        try {
+            FileHelper.decompress(new File(fileCopy + "_data/compressed/" + fileCopy.getName() + ".gz"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     // Copies files from the local file system into a new file.
     private void copyFileForUpload(final Intent data){
@@ -85,18 +99,34 @@ public class UploadController extends Activity {
         loadingMode();
         // Get a copy of the file on a seperate thread to not lockup the ui.
         Thread thread = new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void run() {
+                //Get name and size of file for the UI.
                 Uri uri = data.getData();
                 Pair<String, String> pair = FileHelper.getNameandSize(uri, UploadController.this);
+                // Set the UI to show the file name and size.
                 fileName.setText(pair.first);
                 fileSize.setText(pair.second);
 
+                // Get a copy of the file
                 File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
-                ArrayList<ChunkFile> files = FileHelper.splitFileIntoChunks(fileCopy, UploadController.this);
-                String res = FileHelper.merge(files.get(0).getLocation(), UploadController.this);
-                System.out.println(res);
+
+                PeerSplitFile ps = new PeerSplitFile(fileCopy, fileCopy.getPath()+"_data");
+
+                // Compress into a new file.
+                File compressedFile = compressFile(fileCopy);
+                ps.file = compressedFile;
+
+
+                ArrayList<ChunkFile> files = FileHelper.splitFileIntoChunks(ps);
+                System.out.println(files.size());
+
+                // Decompress into a new file.
+                //decompressFile(fileCopy);
+
+
+                // Merging Files
+                //String res = FileHelper.merge(files.get(0).getLocation(), UploadController.this);
 
                 // Run the change UI on the UI thread.
                 runOnUiThread(new Runnable() {

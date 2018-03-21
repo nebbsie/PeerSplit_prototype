@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Pair;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
+import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -18,15 +20,17 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class FileHelper {
 
     // Splits a file into chunks and returns an array with the files.
-    public static ArrayList<ChunkFile> splitFileIntoChunks(File file, Activity activity){
+    public static ArrayList<ChunkFile> splitFileIntoChunks(PeerSplitFile peerSplitFileIn){
         // Array list of all chunks.
         ArrayList<ChunkFile> files = new ArrayList<>();
         // File to split into chunks, and get name.
-        File baseFile = file;
+        File baseFile = peerSplitFileIn.file;
         String fileName = baseFile.getName();
         // Counter to create numbered chunk name.
         int chunkCounter = 0;
@@ -35,17 +39,17 @@ public class FileHelper {
         int chunkSize = 1024 * (getSizeOfChunk(baseFile.length()));
         // Array to store the bytes into.
         byte[] dataBuffer = new byte[chunkSize];
-        // Get the position of where the chunks are stored.
-        File myDir = activity.getFilesDir();
         // Where the output chunks will be placed.
-        String chunkLocation = baseFile.getParent()+"/"+fileName+"_data"+"/chunks";
-        String outputLocation = baseFile.getParent()+"/"+fileName+"_data"+"/output";
+        String chunkLocation = peerSplitFileIn.location + "/chunks";
         // Create the location to place chunks and output.
         new File(chunkLocation).mkdirs();
-        new File(outputLocation).mkdirs();
+       // new File(outputLocation).mkdirs();
+
+
         System.out.println("Splitting: " + fileName);
         System.out.println("Chunk Size: " + chunkSize / 1024 + " KB");
         System.out.println(chunkLocation);
+
         try{
             int byteData;
             FileInputStream fis = new FileInputStream(baseFile);
@@ -75,7 +79,6 @@ public class FileHelper {
         }
         return files;
     }
-
 
     // Merge the files into one output file.
     public static String merge(String name, Activity activity) {
@@ -121,6 +124,7 @@ public class FileHelper {
         return "Merged " + files.size() + " file/s  Totaling: " + (sizeOfMerge / 1048576) + " MB";
     }
 
+    // Returns the size of each chunk to be used for splitting.
     private static int getSizeOfChunk(long size){
         //TODO: set device number to a number of phones availible.
         int devices = 10;
@@ -230,5 +234,35 @@ public class FileHelper {
         }
         return null;
     }
+
+    public static File compress(File input, File output) throws IOException {
+        new File(input+"_data/compressed").mkdirs();
+        GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output));
+        FileInputStream in = new FileInputStream(input);
+        byte[] buffer = new byte[1024];
+        int len;
+        while((len=in.read(buffer)) != -1){
+            out.write(buffer, 0, len);
+        }
+        out.close();
+        in.close();
+        return output;
+    }
+
+    public static void decompress(File input) throws IOException {
+        new File(input+"_data/decompressed").mkdirs();
+
+        GZIPInputStream in = new GZIPInputStream(new FileInputStream(input));
+        FileOutputStream out = new FileOutputStream(new File(input+"_data/decompressed/"+input.getName()));
+
+        byte[] buffer = new byte[1024];
+        int len;
+        while((len = in.read(buffer)) != -1){
+            out.write(buffer, 0, len);
+        }
+        out.close();
+        in.close();
+    }
+
 
 }

@@ -9,7 +9,6 @@ import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.FileServer;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.aaronnebbs.peersplitandroidapplication.Views.HomeFragment;
@@ -18,7 +17,6 @@ import com.aaronnebbs.peersplitandroidapplication.Views.ProfileFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.SettingsFragment;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 public class HomeController extends FragmentActivity implements Serializable {
@@ -33,8 +31,6 @@ public class HomeController extends FragmentActivity implements Serializable {
     private OverviewFragment overviewActivity;
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
-
-    private FileServer fs;
 
 
     @Override
@@ -59,14 +55,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         overviewActivity = new OverviewFragment();
         profileActivity = new ProfileFragment();
         settingsActivity = new SettingsFragment();
-
-        try {
-            fs = new FileServer(8080);
-            fs.start();
-            System.out.println("HOST: " + fs.getHostname());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
 
         setupNavBar();
