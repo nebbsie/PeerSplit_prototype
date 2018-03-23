@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import java.io.File;
@@ -31,7 +32,6 @@ public class UploadController extends Activity {
     private ProgressBar loadingBar;
     private TextView fileStatus;
     private Button goBack;
-    byte[] key = "MyDifficultPassw".getBytes();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,27 +84,22 @@ public class UploadController extends Activity {
                 // Set the UI to show the file name and size.
                 fileName.setText(pair.first);
                 fileSize.setText(pair.second);
-
                 try {
                     // Get a copy of the file.
                     File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
-
 
                     // Compress the file.
                     fileStatus.setText("Compressing File");
                     File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
 
                     // Generate a private key
-
+                    byte[] key = CryptoHelper.generateKey(fileCopy.getName());
 
                     // Encrypt the file.
                     fileStatus.setText("Encrypting File");
                     File encr = FileHelper.encrypt(key, compressedFile, compressedFile, true);
 
-                    fileStatus.setText("Decrypting File");
-                    FileHelper.decrypt(key, encr, encr, true);
-
-
+                    ArrayList<ChunkFile> chunks = FileHelper.splitFileIntoChunks(encr, true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

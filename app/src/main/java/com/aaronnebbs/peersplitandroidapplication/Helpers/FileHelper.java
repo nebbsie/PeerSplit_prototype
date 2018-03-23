@@ -30,8 +30,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class FileHelper {
 
+    private static int blockSize = 1024;
+
     // Splits a file into chunks and returns an array with the files.
-    public static ArrayList<ChunkFile> splitFileIntoChunks(File input){
+    public static ArrayList<ChunkFile> splitFileIntoChunks(File input, boolean deleteOriginalFile){
         // Array list of all chunks.
         ArrayList<ChunkFile> files = new ArrayList<>();
         // File to split into chunks, and get name.
@@ -46,25 +48,17 @@ public class FileHelper {
         byte[] dataBuffer = new byte[chunkSize];
         // Where the output chunks will be placed.
         String chunkLocation = input.getParent() +  "/chunks";
-        String chunkMergeLocation = input.getParent() +  "/mergeOutput";
-
         // Create the location to place chunks and output.
         new File(chunkLocation).mkdirs();
-        new File(chunkMergeLocation).mkdirs();
-
-        System.out.println("DONE");
 
         System.out.println("Splitting: " + fileName);
         System.out.println("Chunk Size: " + chunkSize / 1024 + " KB");
-        System.out.println(chunkLocation);
-
         try{
             int byteData;
             FileInputStream fis = new FileInputStream(baseFile);
             BufferedInputStream bis = new BufferedInputStream(fis);
             // Read in the the set amount of bytes per loop into dataBuffer
             // Check that the size is bigger than 0.
-            System.out.print("Splitting ");
             while ((byteData = bis.read(dataBuffer)) > 0){
                 // Create file name for chunk.
                 String chunkName = String.format("%s.%03d", fileName, chunkCounter);
@@ -76,16 +70,19 @@ public class FileHelper {
                 // Increment the chunk counter.
                 chunkCounter++;
                 files.add(chunk);
-                System.out.print(". ");
-                System.out.println(chunk.getFile().getName());
             }
             System.out.println("Split into " + chunkCounter + " chunks.");
-            System.out.println("FILES: " + files.size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Delete the original file after
+        if(deleteOriginalFile){
+            input.delete();
+        }
+
         return files;
     }
 
@@ -263,7 +260,7 @@ public class FileHelper {
         // Output stream
         GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output + ".gz"));
         // Buffer used to write to the output file.
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[16 * blockSize];
         int len;
         // Write input file to output file until end of file.
         while((len=in.read(buffer)) != -1){
@@ -299,7 +296,7 @@ public class FileHelper {
         FileOutputStream out = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-3)));
 
         // Buffer used to write to the output file.
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[16 * blockSize];
         int len;
         // Write input file to output file until end of file.
         while((len=in.read(buffer)) != -1){
@@ -335,13 +332,15 @@ public class FileHelper {
         // Create the cipher using AES and using the private key
         SecretKeySpec sks = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES");
+        System.out.println("BLOCK SIZE: " + cipher.getBlockSize());
+
         cipher.init(Cipher.ENCRYPT_MODE, sks);
 
         // Create a cipher output stream.
         CipherOutputStream cos = new CipherOutputStream(fos, cipher);
         // Write bytes
         int len;
-        byte[] data = new byte[8];
+        byte[] data = new byte[blockSize * cipher.getBlockSize()];
         while((len = fis.read(data)) != -1) {
             cos.write(data, 0, len);
         }
@@ -373,11 +372,12 @@ public class FileHelper {
         // Create the cipher using AES and using the private key
         SecretKeySpec sks = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES");
+
         cipher.init(Cipher.DECRYPT_MODE, sks);
         // Create a cipher input stream to read the file.
         CipherInputStream cis = new CipherInputStream(fis, cipher);
         int len;
-        byte[] data = new byte[8];
+        byte[] data = new byte[blockSize * cipher.getBlockSize()];
         while((len = cis.read(data)) != -1) {
             fos.write(data, 0, len);
         }

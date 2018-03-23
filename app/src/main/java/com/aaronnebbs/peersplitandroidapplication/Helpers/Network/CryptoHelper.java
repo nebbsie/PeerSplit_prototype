@@ -17,17 +17,24 @@ public class CryptoHelper {
     private static Type type = new TypeToken<ArrayList<PrivateKeyPair>>(){}.getType();
 
     public static void setup(){
+        keys = new ArrayList<>();
         getSavedKeys();
+        System.out.println("Found: " + keys.size() + " keys.");
     }
 
     private static void getSavedKeys(){
         String keys_out = prefs.getString(SAVEDKEYS, "NULL");
-        keys = new Gson().fromJson(keys_out, type);
+        if(keys_out.equals("NULL")){
+            keys = new ArrayList<>();
+        }else{
+            keys = new Gson().fromJson(keys_out, type);
+        }
+
     }
 
     private static void setSavedkeys(){
         String keys_in = new Gson().toJson(keys);
-        prefs.edit().putString(SAVEDKEYS, keys_in);
+        prefs.edit().putString(SAVEDKEYS, keys_in).apply();
     }
 
     // Searches for a key in the shared preferences to use for decryption.
@@ -40,13 +47,18 @@ public class CryptoHelper {
         return null;
     }
 
-    // Generates
+    // Generates a private key to be used.
     public static byte[] generateKey(String name){
         byte[] b = new byte[16];
         new Random().nextBytes(b);
         keys.add(new PrivateKeyPair(name, b));
         setSavedkeys();
         return b;
+    }
+
+    public static void clearKeys(){
+        keys = new ArrayList<>();
+        setSavedkeys();
     }
 
 }
