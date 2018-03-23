@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Pair;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
-import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -32,11 +31,11 @@ import javax.crypto.spec.SecretKeySpec;
 public class FileHelper {
 
     // Splits a file into chunks and returns an array with the files.
-    public static ArrayList<ChunkFile> splitFileIntoChunks(PeerSplitFile peerSplitFileIn){
+    public static ArrayList<ChunkFile> splitFileIntoChunks(File input){
         // Array list of all chunks.
         ArrayList<ChunkFile> files = new ArrayList<>();
         // File to split into chunks, and get name.
-        File baseFile = peerSplitFileIn.file;
+        File baseFile = input;
         String fileName = baseFile.getName();
         // Counter to create numbered chunk name.
         int chunkCounter = 0;
@@ -46,15 +45,14 @@ public class FileHelper {
         // Array to store the bytes into.
         byte[] dataBuffer = new byte[chunkSize];
         // Where the output chunks will be placed.
-        String chunkLocation = peerSplitFileIn.location + "/chunks";
-        String chunkMergeLocation = peerSplitFileIn.location + "/mergeOutput";
+        String chunkLocation = input.getParent() +  "/chunks";
+        String chunkMergeLocation = input.getParent() +  "/mergeOutput";
 
         // Create the location to place chunks and output.
         new File(chunkLocation).mkdirs();
         new File(chunkMergeLocation).mkdirs();
 
-       // new File(outputLocation).mkdirs();
-
+        System.out.println("DONE");
 
         System.out.println("Splitting: " + fileName);
         System.out.println("Chunk Size: " + chunkSize / 1024 + " KB");
@@ -71,7 +69,7 @@ public class FileHelper {
                 // Create file name for chunk.
                 String chunkName = String.format("%s.%03d", fileName, chunkCounter);
                 // Make a new file for the chunk.
-                ChunkFile chunk = new ChunkFile(new File(chunkLocation, chunkName), chunkLocation);
+                ChunkFile chunk = new ChunkFile(new File(chunkLocation, chunkName));
                 // Write the data to the new file.
                 FileOutputStream out = new FileOutputStream(chunk.getFile());
                 out.write(dataBuffer,0,byteData);
@@ -79,6 +77,7 @@ public class FileHelper {
                 chunkCounter++;
                 files.add(chunk);
                 System.out.print(". ");
+                System.out.println(chunk.getFile().getName());
             }
             System.out.println("Split into " + chunkCounter + " chunks.");
             System.out.println("FILES: " + files.size());
@@ -91,9 +90,9 @@ public class FileHelper {
     }
 
     // Merge the files into one output file.
-    public static File merge(String name) {
+    public static File merge(File input) {
         // Get the files to merge.
-        File[] chunks = new File(name).listFiles();
+        File[] chunks = input.getParentFile().listFiles();
         Arrays.sort(chunks);
         List<File> files = Arrays.asList(chunks);
         // Return error message if no chunks are found.
@@ -111,16 +110,13 @@ public class FileHelper {
         }
         // Create the file name based on the first chunks information.
         String path = files.get(0).getParentFile().getParentFile()+"/mergeOutput/";
-        String outputFileName = strings[0] + "." + strings[1]+".gz";
+        String outputFileName = strings[0] + "." + strings[1];
         File outputFile = new File( path + outputFileName);
         int sizeOfMerge = 0;
-        // Merge the files.
 
-        FileOutputStream fos = null;
-        BufferedOutputStream fileOut = null;
         try {
-            fos = new FileOutputStream(outputFile);
-            fileOut = new BufferedOutputStream(fos);
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            BufferedOutputStream fileOut = new BufferedOutputStream(fos);
             for (File f : files) {
                 RandomAccessFile fl = new RandomAccessFile(f, "r");
                 byte[] b = new byte[(int) f.length()];
@@ -265,7 +261,7 @@ public class FileHelper {
         // Input stream
         FileInputStream in = new FileInputStream(input);
         // Output stream
-        GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output + "gz"));
+        GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output + ".gz"));
         // Buffer used to write to the output file.
         byte[] buffer = new byte[1024];
         int len;
@@ -282,7 +278,7 @@ public class FileHelper {
         if(deleteOriginalFile){
             input.delete();
         }
-        return new File(output.getPath()+"gz");
+        return new File(output.getPath()+".gz");
     }
 
     // Decompresses a compressed file into the a new file.
@@ -300,7 +296,7 @@ public class FileHelper {
         // Input stream
         GZIPInputStream in = new GZIPInputStream(new FileInputStream(input));
         // Output stream
-        FileOutputStream out = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-2)));
+        FileOutputStream out = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-3)));
 
         // Buffer used to write to the output file.
         byte[] buffer = new byte[1024];
@@ -322,7 +318,7 @@ public class FileHelper {
     }
 
     // Encrypts a file into a new file.
-    public static File encrypt(File input, File output, boolean deleteOriginalFile) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public static File encrypt(byte[] key ,File input, File output, boolean deleteOriginalFile) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         // Check if the input is valid.
         if(!input.exists()){
             System.out.println("ENCRYPTION: Input file not found! " + input.getPath());
@@ -336,10 +332,8 @@ public class FileHelper {
         FileInputStream fis = new FileInputStream(input);
         // Output stream
         FileOutputStream fos = new FileOutputStream(output + "enc");
-
-        //TODO: make this a save 16byte key!
         // Create the cipher using AES and using the private key
-        SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
+        SecretKeySpec sks = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, sks);
 
@@ -358,12 +352,11 @@ public class FileHelper {
         if(deleteOriginalFile){
             input.delete();
         }
-
         return new File(output.getPath() + "enc");
     }
 
     // Decrypts a file into a new file.
-    public static File decrypt(File input, File output, boolean deleteOriginalFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+    public static File decrypt(byte[] key, File input, File output, boolean deleteOriginalFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         // Check if the input is valid.
         if(!input.exists()){
             System.out.println("DECRYPTION: Input file not found! " + input.getPath());
@@ -376,11 +369,9 @@ public class FileHelper {
         // Input stream.
         FileInputStream fis = new FileInputStream(input);
         // Output stream.
-        FileOutputStream fos = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-2)));
-
-        //TODO: make this a save 16byte key!
+        FileOutputStream fos = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-3)));
         // Create the cipher using AES and using the private key
-        SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
+        SecretKeySpec sks = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, sks);
         // Create a cipher input stream to read the file.
@@ -397,10 +388,6 @@ public class FileHelper {
         if(deleteOriginalFile){
             input.delete();
         }
-        return output;
+        return new File(output.getPath().substring(0, output.getPath().length()-3));
     }
-
-
-
-
 }

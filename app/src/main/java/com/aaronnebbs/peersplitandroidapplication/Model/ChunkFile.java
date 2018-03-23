@@ -4,19 +4,14 @@ import java.io.File;
 
 public class ChunkFile {
     private File file;
-    private String chunksFolderLocation;
 
-    public ChunkFile(File file, String loc){
+    public ChunkFile(File file){
         this.file = file;
-        this.chunksFolderLocation = loc;
     }
 
     public File getFile() {
         return file;
     }
 
-    public String getLocation() {
-        return chunksFolderLocation;
-    }
 
 }

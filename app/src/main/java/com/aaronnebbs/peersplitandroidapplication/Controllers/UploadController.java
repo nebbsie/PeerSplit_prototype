@@ -12,15 +12,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
-import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import java.io.File;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-
-import javax.crypto.NoSuchPaddingException;
 
 import az.plainpie.PieView;
 
@@ -37,6 +31,7 @@ public class UploadController extends Activity {
     private ProgressBar loadingBar;
     private TextView fileStatus;
     private Button goBack;
+    byte[] key = "MyDifficultPassw".getBytes();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,25 +85,29 @@ public class UploadController extends Activity {
                 fileName.setText(pair.first);
                 fileSize.setText(pair.second);
 
-                // Get a copy of the file
-                File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
-
                 try {
-                    File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
-                    File decompressed = FileHelper.decompress(compressedFile, compressedFile ,true);
-                    File encr = FileHelper.encrypt(decompressed, decompressed, true);
-                    FileHelper.decrypt(encr, encr, true);
+                    // Get a copy of the file.
+                    File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (NoSuchPaddingException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (InvalidKeyException e) {
+
+                    // Compress the file.
+                    fileStatus.setText("Compressing File");
+                    File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
+
+                    // Generate a private key
+
+
+                    // Encrypt the file.
+                    fileStatus.setText("Encrypting File");
+                    File encr = FileHelper.encrypt(key, compressedFile, compressedFile, true);
+
+                    fileStatus.setText("Decrypting File");
+                    FileHelper.decrypt(key, encr, encr, true);
+
+
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-
                 // Run the change UI on the UI thread.
                 runOnUiThread(new Runnable() {
                     @Override

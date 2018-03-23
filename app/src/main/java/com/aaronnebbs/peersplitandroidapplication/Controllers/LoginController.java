@@ -3,17 +3,15 @@ package com.aaronnebbs.peersplitandroidapplication.Controllers;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
@@ -21,10 +19,6 @@ import com.aaronnebbs.peersplitandroidapplication.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.gson.Gson;
-
-import java.util.Set;
 
 public class LoginController extends Activity {
 
@@ -44,10 +38,13 @@ public class LoginController extends Activity {
         setupUI();
         // Setup the shared preferences.
         SettingsHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
+        CryptoHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
         // Setup the database links and also user.
         UserManager.setup();
         // Load values from the share preferences.
         SettingsHelper.setup();
+        // Setup the crypto.
+        CryptoHelper.setup();
 
         // Check if the application needs to auto login.
         if(SettingsHelper.AUTO_LOGIN){
