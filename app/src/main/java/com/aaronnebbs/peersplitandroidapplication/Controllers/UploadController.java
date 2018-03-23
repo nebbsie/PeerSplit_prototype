@@ -10,15 +10,17 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
-
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+
+import javax.crypto.NoSuchPaddingException;
 
 import az.plainpie.PieView;
 
@@ -84,14 +86,6 @@ public class UploadController extends Activity {
         return null;
     }
 
-    // Attempt to compress file.
-    private void decompressFile(File fileCopy){
-        try {
-            FileHelper.decompress(new File(fileCopy + "_data/compressed/" + fileCopy.getName() + ".gz"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     // Copies files from the local file system into a new file.
     private void copyFileForUpload(final Intent data){
@@ -111,22 +105,39 @@ public class UploadController extends Activity {
                 // Get a copy of the file
                 File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
 
+                // File link to use for compression and encryption.
                 PeerSplitFile ps = new PeerSplitFile(fileCopy, fileCopy.getPath()+"_data");
 
                 // Compress into a new file.
-                File compressedFile = compressFile(fileCopy);
+                File compressedFile = compressFile(ps.file);
                 ps.file = compressedFile;
 
 
+                try {
+                    ps.file = FileHelper.encrypt(ps);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // Split the file
                 ArrayList<ChunkFile> files = FileHelper.splitFileIntoChunks(ps);
                 System.out.println(files.size());
 
-                // Decompress into a new file.
-                //decompressFile(fileCopy);
-
-
                 // Merging Files
-                //String res = FileHelper.merge(files.get(0).getLocation(), UploadController.this);
+                ps.file = FileHelper.merge(files.get(0).getLocation());
+
+                try {
+                    FileHelper.decrypt(ps);
+                    FileHelper.decompress(ps);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (NoSuchPaddingException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeyException e) {
+                    e.printStackTrace();
+                }
 
                 // Run the change UI on the UI thread.
                 runOnUiThread(new Runnable() {

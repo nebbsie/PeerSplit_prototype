@@ -3,27 +3,48 @@ package com.aaronnebbs.peersplitandroidapplication.Helpers;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.OpenableColumns;
+import android.support.annotation.RequiresApi;
+import android.util.Base64;
 import android.util.Pair;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
+import com.scottyab.aescrypt.AESCrypt;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 public class FileHelper {
+
+    public static byte[] key;
+    public static byte[] initVector = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17};
 
     // Splits a file into chunks and returns an array with the files.
     public static ArrayList<ChunkFile> splitFileIntoChunks(PeerSplitFile peerSplitFileIn){
@@ -41,8 +62,12 @@ public class FileHelper {
         byte[] dataBuffer = new byte[chunkSize];
         // Where the output chunks will be placed.
         String chunkLocation = peerSplitFileIn.location + "/chunks";
+        String chunkMergeLocation = peerSplitFileIn.location + "/mergeOutput";
+
         // Create the location to place chunks and output.
         new File(chunkLocation).mkdirs();
+        new File(chunkMergeLocation).mkdirs();
+
        // new File(outputLocation).mkdirs();
 
 
@@ -81,25 +106,29 @@ public class FileHelper {
     }
 
     // Merge the files into one output file.
-    public static String merge(String name, Activity activity) {
+    public static File merge(String name) {
+
+
         // Get the files to merge.
         File[] chunks = new File(name).listFiles();
         Arrays.sort(chunks);
         List<File> files = Arrays.asList(chunks);
         // Return error message if no chunks are found.
         if(files.size() == 0){
-            return "No chunks found!";
+            System.out.println("no chunks found!");
+            return null;
         }
         // Get the first chunks name and split into strings to get name and extension.
         String fileName = files.get(0).getName();
         String[] strings = fileName.split("\\.");
         // Check if the has a correct name and extension to use for the output file.
         if(strings.length == 0){
-            return "Failed to get filename and extension!";
+            System.out.println("Failed to get filename and extension!");
+            return null;
         }
         // Create the file name based on the first chunks information.
-        String path = files.get(0).getParentFile().getParentFile()+"/output"+"/";
-        String outputFileName = strings[0] + "." + strings[1];
+        String path = files.get(0).getParentFile().getParentFile()+"/mergeOutput/";
+        String outputFileName = strings[0] + "." + strings[1]+".gz";
         File outputFile = new File( path + outputFileName);
         int sizeOfMerge = 0;
         // Merge the files.
@@ -121,7 +150,8 @@ public class FileHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "Merged " + files.size() + " file/s  Totaling: " + (sizeOfMerge / 1048576) + " MB";
+        System.out.println("Merged " + files.size() + " file/s  Totaling: " + (sizeOfMerge / 1048576) + " MB");
+        return outputFile;
     }
 
     // Returns the size of each chunk to be used for splitting.
@@ -235,6 +265,10 @@ public class FileHelper {
         return null;
     }
 
+
+
+
+
     public static File compress(File input, File output) throws IOException {
         new File(input+"_data/compressed").mkdirs();
         GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output));
@@ -249,11 +283,11 @@ public class FileHelper {
         return output;
     }
 
-    public static void decompress(File input) throws IOException {
-        new File(input+"_data/decompressed").mkdirs();
 
-        GZIPInputStream in = new GZIPInputStream(new FileInputStream(input));
-        FileOutputStream out = new FileOutputStream(new File(input+"_data/decompressed/"+input.getName()));
+    public static void decompress(PeerSplitFile ps) throws IOException {
+        new File(ps.location+"/decompressed/").mkdirs();
+        GZIPInputStream in = new GZIPInputStream(new FileInputStream(new File(ps.location+"/decoded/"+ps.file.getName())));
+        FileOutputStream out = new FileOutputStream(new File(ps.location+"/decompressed/" + ps.originalName));
 
         byte[] buffer = new byte[1024];
         int len;
@@ -263,6 +297,56 @@ public class FileHelper {
         out.close();
         in.close();
     }
+
+    public static File encrypt(PeerSplitFile psFile) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        // Here you read the cleartext.
+        FileInputStream fis = new FileInputStream(psFile.file);
+        // This stream write the encrypted text. This stream will be wrapped by another stream.
+        new File(psFile.location+"/encoded/").mkdirs();
+        FileOutputStream fos = new FileOutputStream(psFile.location+"/encoded/"+psFile.file.getName());
+
+        // Length is 16 byte
+        // Careful when taking user input!!! https://stackoverflow.com/a/3452620/1188357
+        SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
+        // Create cipher
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, sks);
+        // Wrap the output stream
+        CipherOutputStream cos = new CipherOutputStream(fos, cipher);
+        // Write bytes
+        int b;
+        byte[] d = new byte[8];
+        while((b = fis.read(d)) != -1) {
+            cos.write(d, 0, b);
+        }
+        // Flush and close streams.
+        cos.flush();
+        cos.close();
+        fis.close();
+        return new File(psFile.location+"/encoded/"+psFile.file.getName());
+    }
+
+    public static void decrypt(PeerSplitFile psFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+
+        FileInputStream fis = new FileInputStream(psFile.location+"/encoded/"+psFile.file.getName());
+
+        new File(psFile.location+"/decoded/").mkdirs();
+        FileOutputStream fos = new FileOutputStream(psFile.location+"/decoded/"+psFile.file.getName());
+        SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, sks);
+        CipherInputStream cis = new CipherInputStream(fis, cipher);
+        int b;
+        byte[] d = new byte[8];
+        while((b = cis.read(d)) != -1) {
+            fos.write(d, 0, b);
+        }
+        fos.flush();
+        fos.close();
+        cis.close();
+    }
+
+
 
 
 }
