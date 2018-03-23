@@ -74,18 +74,6 @@ public class UploadController extends Activity {
         });
     }
 
-    // Attempt to compress file.
-    private File compressFile(File fileCopy){
-        try {
-            File f = FileHelper.compress(fileCopy, new File(fileCopy + "_data/compressed/" + fileCopy.getName() + ".gz"));
-            fileCopy.delete();
-            return f;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
 
     // Copies files from the local file system into a new file.
     private void copyFileForUpload(final Intent data){
@@ -105,35 +93,17 @@ public class UploadController extends Activity {
                 // Get a copy of the file
                 File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
 
-                // File link to use for compression and encryption.
-                PeerSplitFile ps = new PeerSplitFile(fileCopy, fileCopy.getPath()+"_data");
-
-                // Compress into a new file.
-                File compressedFile = compressFile(ps.file);
-                ps.file = compressedFile;
-
-
                 try {
-                    ps.file = FileHelper.encrypt(ps);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
+                    File decompressed = FileHelper.decompress(compressedFile, compressedFile ,true);
+                    File encr = FileHelper.encrypt(decompressed, decompressed, true);
+                    FileHelper.decrypt(encr, encr, true);
 
-                // Split the file
-                ArrayList<ChunkFile> files = FileHelper.splitFileIntoChunks(ps);
-                System.out.println(files.size());
-
-                // Merging Files
-                ps.file = FileHelper.merge(files.get(0).getLocation());
-
-                try {
-                    FileHelper.decrypt(ps);
-                    FileHelper.decompress(ps);
                 } catch (IOException e) {
                     e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
                 } catch (NoSuchPaddingException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 } catch (InvalidKeyException e) {
                     e.printStackTrace();

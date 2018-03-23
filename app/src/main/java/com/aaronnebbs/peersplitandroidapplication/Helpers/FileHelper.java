@@ -3,48 +3,33 @@ package com.aaronnebbs.peersplitandroidapplication.Helpers;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.OpenableColumns;
-import android.support.annotation.RequiresApi;
-import android.util.Base64;
 import android.util.Pair;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.PeerSplitFile;
-import com.scottyab.aescrypt.AESCrypt;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 public class FileHelper {
-
-    public static byte[] key;
-    public static byte[] initVector = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17};
 
     // Splits a file into chunks and returns an array with the files.
     public static ArrayList<ChunkFile> splitFileIntoChunks(PeerSplitFile peerSplitFileIn){
@@ -107,8 +92,6 @@ public class FileHelper {
 
     // Merge the files into one output file.
     public static File merge(String name) {
-
-
         // Get the files to merge.
         File[] chunks = new File(name).listFiles();
         Arrays.sort(chunks);
@@ -236,10 +219,11 @@ public class FileHelper {
         System.out.println("Creating: " + returnCursor.getString(nameIndex) + "\nSize: " + returnCursor.getLong(sizeIndex));
         // Create a local copy of the file on phone
         try {
+            new File(activity.getApplicationContext().getFilesDir() + "/" + returnCursor.getString(nameIndex)+"_data").mkdirs();
             // Get the input stream from file
             InputStream in =  activity.getContentResolver().openInputStream(uri);
             // Create a new file in a random location
-            File file = new File(activity.getApplicationContext().getFilesDir(), returnCursor.getString(nameIndex));
+            File file = new File(activity.getApplicationContext().getFilesDir() + "/" +  returnCursor.getString(nameIndex)+"_data", returnCursor.getString(nameIndex));
             // Set an output stream into the new file
             FileOutputStream fos = new FileOutputStream(file);
             // Copy the contents of the original file to the new file
@@ -265,85 +249,155 @@ public class FileHelper {
         return null;
     }
 
+    // Compresses file into another file given.
+    public static File compress(File input, File output, boolean deleteOriginalFile) throws IOException {
 
+        // Check if the input is valid.
+        if(!input.exists()){
+            System.out.println("COMPRESSION: Input file not found! " + input.getPath());
+            return null;
+        }
+        // Create the output location if it does not exist.
+        if(!output.exists()){
+            output.mkdirs();
+        }
 
-
-
-    public static File compress(File input, File output) throws IOException {
-        new File(input+"_data/compressed").mkdirs();
-        GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output));
+        // Input stream
         FileInputStream in = new FileInputStream(input);
+        // Output stream
+        GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(output + "gz"));
+        // Buffer used to write to the output file.
         byte[] buffer = new byte[1024];
         int len;
+        // Write input file to output file until end of file.
         while((len=in.read(buffer)) != -1){
             out.write(buffer, 0, len);
         }
+        // Close down streams.
         out.close();
         in.close();
-        return output;
+        System.out.println("COMPRESSION: Compressed " + input.getName());
+
+        // Checks if the original file should be deleted.
+        if(deleteOriginalFile){
+            input.delete();
+        }
+        return new File(output.getPath()+"gz");
     }
 
+    // Decompresses a compressed file into the a new file.
+    public static File decompress(File input, File output,boolean deleteOriginalFile) throws IOException {
 
-    public static void decompress(PeerSplitFile ps) throws IOException {
-        new File(ps.location+"/decompressed/").mkdirs();
-        GZIPInputStream in = new GZIPInputStream(new FileInputStream(new File(ps.location+"/decoded/"+ps.file.getName())));
-        FileOutputStream out = new FileOutputStream(new File(ps.location+"/decompressed/" + ps.originalName));
+        // Check if the input is valid.
+        if(!input.exists()){
+            System.out.println("DECOMPRESSION: Input file not found! " + input.getPath());
+            return null;
+        }
+        // Create the output location if it does not exist.
+        if(!output.exists()){
+            output.mkdirs();
+        }
+        // Input stream
+        GZIPInputStream in = new GZIPInputStream(new FileInputStream(input));
+        // Output stream
+        FileOutputStream out = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-2)));
 
+        // Buffer used to write to the output file.
         byte[] buffer = new byte[1024];
         int len;
-        while((len = in.read(buffer)) != -1){
+        // Write input file to output file until end of file.
+        while((len=in.read(buffer)) != -1){
             out.write(buffer, 0, len);
         }
+        // Close down streams.
         out.close();
         in.close();
+
+        // Checks if the original file should be deleted.
+        if(deleteOriginalFile){
+            input.delete();
+        }
+
+        return new File(output.getPath().substring(0, output.getPath().length()-2));
     }
 
-    public static File encrypt(PeerSplitFile psFile) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        // Here you read the cleartext.
-        FileInputStream fis = new FileInputStream(psFile.file);
-        // This stream write the encrypted text. This stream will be wrapped by another stream.
-        new File(psFile.location+"/encoded/").mkdirs();
-        FileOutputStream fos = new FileOutputStream(psFile.location+"/encoded/"+psFile.file.getName());
+    // Encrypts a file into a new file.
+    public static File encrypt(File input, File output, boolean deleteOriginalFile) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        // Check if the input is valid.
+        if(!input.exists()){
+            System.out.println("ENCRYPTION: Input file not found! " + input.getPath());
+            return null;
+        }
+        // Create the output location if it does not exist.
+        if(!output.exists()){
+            output.mkdirs();
+        }
+        // Input stream
+        FileInputStream fis = new FileInputStream(input);
+        // Output stream
+        FileOutputStream fos = new FileOutputStream(output + "enc");
 
-        // Length is 16 byte
-        // Careful when taking user input!!! https://stackoverflow.com/a/3452620/1188357
+        //TODO: make this a save 16byte key!
+        // Create the cipher using AES and using the private key
         SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
-        // Create cipher
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, sks);
-        // Wrap the output stream
+
+        // Create a cipher output stream.
         CipherOutputStream cos = new CipherOutputStream(fos, cipher);
         // Write bytes
-        int b;
-        byte[] d = new byte[8];
-        while((b = fis.read(d)) != -1) {
-            cos.write(d, 0, b);
+        int len;
+        byte[] data = new byte[8];
+        while((len = fis.read(data)) != -1) {
+            cos.write(data, 0, len);
         }
-        // Flush and close streams.
         cos.flush();
         cos.close();
         fis.close();
-        return new File(psFile.location+"/encoded/"+psFile.file.getName());
+        // Check if need to delete the original file.
+        if(deleteOriginalFile){
+            input.delete();
+        }
+
+        return new File(output.getPath() + "enc");
     }
 
-    public static void decrypt(PeerSplitFile psFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+    // Decrypts a file into a new file.
+    public static File decrypt(File input, File output, boolean deleteOriginalFile) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        // Check if the input is valid.
+        if(!input.exists()){
+            System.out.println("DECRYPTION: Input file not found! " + input.getPath());
+            return null;
+        }
+        // Create the output location if it does not exist.
+        if(!output.exists()){
+            output.mkdirs();
+        }
+        // Input stream.
+        FileInputStream fis = new FileInputStream(input);
+        // Output stream.
+        FileOutputStream fos = new FileOutputStream(new File(output.getPath().substring(0, output.getPath().length()-2)));
 
-        FileInputStream fis = new FileInputStream(psFile.location+"/encoded/"+psFile.file.getName());
-
-        new File(psFile.location+"/decoded/").mkdirs();
-        FileOutputStream fos = new FileOutputStream(psFile.location+"/decoded/"+psFile.file.getName());
+        //TODO: make this a save 16byte key!
+        // Create the cipher using AES and using the private key
         SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, sks);
+        // Create a cipher input stream to read the file.
         CipherInputStream cis = new CipherInputStream(fis, cipher);
-        int b;
-        byte[] d = new byte[8];
-        while((b = cis.read(d)) != -1) {
-            fos.write(d, 0, b);
+        int len;
+        byte[] data = new byte[8];
+        while((len = cis.read(data)) != -1) {
+            fos.write(data, 0, len);
         }
         fos.flush();
         fos.close();
         cis.close();
+        // Check if need to delete the original file.
+        if(deleteOriginalFile){
+            input.delete();
+        }
+        return output;
     }
 
 
