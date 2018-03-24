@@ -100,53 +100,46 @@ public class UploadController extends Activity {
                 try {
                     // Get a copy of the file.
                     File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
-
                     // Compress the file.
                     fileStatus.setText("Compressing File");
                     File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
-
                     // Generate a private key
                     byte[] key = CryptoHelper.generateKey(fileCopy.getName());
-
                     // Encrypt the file.
                     fileStatus.setText("Encrypting File");
-                    File encr = FileHelper.encrypt(key, compressedFile, compressedFile, true);
+                    final File encr = FileHelper.encrypt(key, compressedFile, compressedFile, true);
 
-                    //TODO: work out how many chunks to split to
-                    ArrayList<ChunkFile> chunks = FileHelper.splitFileIntoChunks(encr, true);
-                    //TODO: update firebase with the chunk names and the location the uid they should go to.
-
-
+                    // Get the availible devices for storage.
                     UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            System.out.println("AGAIN");
                             ArrayList<User> availibleUsers = new ArrayList<>();
                             for(DataSnapshot s : dataSnapshot.getChildren()){
                                 User user = s.getValue(User.class);
-                                System.out.println("Checking: " + user.getUsername());
                                 // Dont add users if they are own device.
                                 if(!user.getUsername().equals(UserManager.userAccount.getUsername())){
+                                    // Check if the wifi settings allow for transmission and if they allow storage.
                                     if(user.isCanTransmitData() && user.isAllowsDeviceStorage()){
+                                        // Check if they are online.
                                         if(UserManager.getIfOnline(user)){
+                                            // Check if device has enough storage.
                                             availibleUsers.add(user);
                                         }
                                     }
                                 }
                             }
-
                             System.out.println(availibleUsers.size() + " users found.");
+                            // Split the file into chunks.
+                            final ArrayList<ChunkFile> chunks = FileHelper.splitFileIntoChunks(encr, true, availibleUsers.size());
+                            // Selects what devices will recieve the chunks.
+                            selectDevicesForFiles(chunks, availibleUsers);
+                            // Upload the chunks to the server.
+                            uploadChunks(chunks);
                         }
-
                         @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-
+                        public void onCancelled(DatabaseError databaseError) {}
                     });
 
-
-                    uploadChunks(chunks);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -162,6 +155,11 @@ public class UploadController extends Activity {
         thread.start();
     }
 
+    private void selectDevicesForFiles(ArrayList<ChunkFile> chunks, ArrayList<User> availibleDevices){
+        //TODO: update firebase with the chunk names and the location the uid they should go to.
+    }
+
+    // Uploads the chunks to the server.
     private void uploadChunks(ArrayList<ChunkFile> chunks){
         SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, "http://10.0.2.2/peersplit/upload.php", new Response.Listener<String>() {
             @Override
@@ -176,10 +174,7 @@ public class UploadController extends Activity {
             }
         });
 
-        System.out.println(chunks.size());
-
         for(ChunkFile chunk : chunks){
-            System.out.println("Adding" + chunk.getFile().getName());
             smr.addFile(chunk.getFile().getName(), chunk.getFile().getAbsolutePath());
         }
 

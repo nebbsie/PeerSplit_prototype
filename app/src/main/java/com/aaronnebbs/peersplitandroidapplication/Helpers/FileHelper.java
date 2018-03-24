@@ -33,7 +33,7 @@ public class FileHelper {
     private static int blockSize = 1024;
 
     // Splits a file into chunks and returns an array with the files.
-    public static ArrayList<ChunkFile> splitFileIntoChunks(File input, boolean deleteOriginalFile){
+    public static ArrayList<ChunkFile> splitFileIntoChunks(File input, boolean deleteOriginalFile, int onlineDevices){
         // Array list of all chunks.
         ArrayList<ChunkFile> files = new ArrayList<>();
         // File to split into chunks, and get name.
@@ -43,7 +43,7 @@ public class FileHelper {
         int chunkCounter = 0;
         // Size of each chunk.
         //TODO: Make this automatic depending on file size and amount of users.
-        int chunkSize = 1024 * (getSizeOfChunk(baseFile.length()));
+        int chunkSize = 1024 * (getSizeOfChunk(baseFile.length(), onlineDevices));
         // Array to store the bytes into.
         byte[] dataBuffer = new byte[chunkSize];
         // Where the output chunks will be placed.
@@ -131,9 +131,8 @@ public class FileHelper {
     }
 
     // Returns the size of each chunk to be used for splitting.
-    private static int getSizeOfChunk(long size){
+    private static int getSizeOfChunk(long size, int devices){
         //TODO: set device number to a number of phones availible.
-        int devices = 10;
         System.out.println("Devices Online: " + devices);
         long autoSize = (size / devices)/1024;
         int autoSizeRounded = roundUpToNearestPowerOfTwo(autoSize);
