@@ -12,10 +12,23 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.CryptoHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
+import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.SimpleMultiPartRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 
 import az.plainpie.PieView;
 
@@ -99,7 +112,41 @@ public class UploadController extends Activity {
                     fileStatus.setText("Encrypting File");
                     File encr = FileHelper.encrypt(key, compressedFile, compressedFile, true);
 
+                    //TODO: work out how many chunks to split to
                     ArrayList<ChunkFile> chunks = FileHelper.splitFileIntoChunks(encr, true);
+                    //TODO: update firebase with the chunk names and the location the uid they should go to.
+
+
+                    UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            System.out.println("AGAIN");
+                            ArrayList<User> availibleUsers = new ArrayList<>();
+                            for(DataSnapshot s : dataSnapshot.getChildren()){
+                                User user = s.getValue(User.class);
+                                System.out.println("Checking: " + user.getUsername());
+                                // Dont add users if they are own device.
+                                if(!user.getUsername().equals(UserManager.userAccount.getUsername())){
+                                    if(user.isCanTransmitData() && user.isAllowsDeviceStorage()){
+                                        if(UserManager.getIfOnline(user)){
+                                            availibleUsers.add(user);
+                                        }
+                                    }
+                                }
+                            }
+
+                            System.out.println(availibleUsers.size() + " users found.");
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+
+                    });
+
+
+                    uploadChunks(chunks);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -113,6 +160,32 @@ public class UploadController extends Activity {
             }
         });
         thread.start();
+    }
+
+    private void uploadChunks(ArrayList<ChunkFile> chunks){
+        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, "http://10.0.2.2/peersplit/upload.php", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                System.out.println("UPLOADED");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                System.out.println(error.getMessage());
+            }
+        });
+
+        System.out.println(chunks.size());
+
+        for(ChunkFile chunk : chunks){
+            System.out.println("Adding" + chunk.getFile().getName());
+            smr.addFile(chunk.getFile().getName(), chunk.getFile().getAbsolutePath());
+        }
+
+        smr.addStringParam("uid", UserManager.user.getUid());
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        queue.add(smr);
     }
 
     // Opens the file picker

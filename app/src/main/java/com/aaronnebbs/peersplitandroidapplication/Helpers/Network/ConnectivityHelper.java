@@ -19,6 +19,27 @@ public class ConnectivityHelper{
     private static boolean USING_MOBILE;
     public static boolean CAN_UPLOAD;
     public static String IP_ADDRESS;
+    public static Long CURERNTTIME = 0L;
+
+
+    public static long getEpochMinute(){
+
+        new Thread() {
+            public void run() {
+                try {
+                    URL getIP = new URL("http://peersplit.com/api/getTime.php");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(getIP.openStream()));
+                    String time = in.readLine();
+                    CURERNTTIME =  Long.valueOf(time);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+        return CURERNTTIME;
+    }
 
     // Gets the IPAddress of the device.
     public static String getPublicIPAddress(){

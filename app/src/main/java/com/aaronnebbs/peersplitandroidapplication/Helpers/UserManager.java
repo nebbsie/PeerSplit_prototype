@@ -1,8 +1,8 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.app.Activity;
+import android.net.ConnectivityManager;
 import android.os.Handler;
-import android.util.Log;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
@@ -10,6 +10,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Date;
 
 public class UserManager {
 
@@ -41,6 +43,7 @@ public class UserManager {
         userAccount.setDeviceStorageAllocation(SettingsHelper.getStorageAmount());
         userAccount.setCanTransmitData(ConnectivityHelper.CAN_UPLOAD);
         userAccount.updateTime();
+        userAccount.setBytesRemaining(getRemainingStorageSpace());
         userDatabaseReference.child(user.getUid()).setValue(userAccount);
     }
 
@@ -64,6 +67,24 @@ public class UserManager {
             System.out.println("Already Running! Don't need to start another!");
         }
 
+    }
+
+    public static long getRemainingStorageSpace(){
+        //TODO: make it take into account the already stored stuff.
+        return (long)((SettingsHelper.getStorageAmount() * 1e+9));
+    }
+
+    public static boolean getIfOnline(User user){
+        long timeNow = ConnectivityHelper.getEpochMinute();
+        long seconds = timeNow - user.getLastOnline();
+        int offlineTime = 25;
+        System.out.println("Since Update: " + seconds + " seconds." );
+
+        if(seconds < offlineTime){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

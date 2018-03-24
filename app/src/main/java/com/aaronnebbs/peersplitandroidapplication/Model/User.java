@@ -3,6 +3,8 @@ package com.aaronnebbs.peersplitandroidapplication.Model;
 import android.app.Activity;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 
 import java.util.Date;
 
@@ -12,24 +14,28 @@ public class User {
     private boolean allowsDeviceStorage;
     private boolean canTransmitData;
     private long lastOnline;
-    private String ip;
+    private long bytesRemaining;
 
+    public User(){
+
+    }
 
     public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, Activity act){
         this.username = username;
         this.deviceStorageAllocation = deviceStorageAllocation;
         this.allowsDeviceStorage = allowsDeviceStorage;
         this.canTransmitData = ConnectivityHelper.canUploadChunk(act);
-        this.lastOnline = new Date().getTime();
-        this.ip = ConnectivityHelper.getPublicIPAddress();
+        this.lastOnline = ConnectivityHelper.getEpochMinute();
+        this.bytesRemaining = UserManager.getRemainingStorageSpace();//USED STORAGE
     }
 
-    public String getIp() {
-        return ip;
+
+    public long getBytesRemaining() {
+        return bytesRemaining;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setBytesRemaining(long bytesRemaining) {
+        this.bytesRemaining = bytesRemaining;
     }
 
     public String getUsername() {
@@ -69,7 +75,7 @@ public class User {
     }
 
     public void  updateTime(){
-        this.lastOnline =  new Date().getTime();
+        this.lastOnline =  ConnectivityHelper.getEpochMinute();
     }
 
 }
