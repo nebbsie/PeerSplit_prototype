@@ -3,10 +3,7 @@ package com.aaronnebbs.peersplitandroidapplication.Model;
 import android.app.Activity;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
-
-import java.util.Date;
 
 public class User {
     private String username;
@@ -15,12 +12,13 @@ public class User {
     private boolean canTransmitData;
     private long lastOnline;
     private long bytesRemaining;
+    private String userID;
 
     public User(){
 
     }
 
-    public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, Activity act){
+    public User(String username, float deviceStorageAllocation, boolean allowsDeviceStorage, Activity act, String userID){
         this.username = username;
         this.deviceStorageAllocation = deviceStorageAllocation;
         this.allowsDeviceStorage = allowsDeviceStorage;
@@ -29,6 +27,13 @@ public class User {
         this.bytesRemaining = UserManager.getRemainingStorageSpace();//USED STORAGE
     }
 
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
 
     public long getBytesRemaining() {
         return bytesRemaining;

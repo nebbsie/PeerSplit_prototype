@@ -63,7 +63,7 @@ public class FileHelper {
                 // Create file name for chunk.
                 String chunkName = String.format("%s.%03d", fileName, chunkCounter);
                 // Make a new file for the chunk.
-                ChunkFile chunk = new ChunkFile(new File(chunkLocation, chunkName));
+                ChunkFile chunk = new ChunkFile(new File(chunkLocation, chunkName), input.getName(), chunkSize);
                 // Write the data to the new file.
                 FileOutputStream out = new FileOutputStream(chunk.getFile());
                 out.write(dataBuffer,0,byteData);

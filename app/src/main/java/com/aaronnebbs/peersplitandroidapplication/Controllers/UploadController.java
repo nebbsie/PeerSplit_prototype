@@ -11,9 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.CryptoHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
+import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.android.volley.Request;
@@ -24,11 +26,11 @@ import com.android.volley.request.SimpleMultiPartRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 
 import az.plainpie.PieView;
 
@@ -123,6 +125,7 @@ public class UploadController extends Activity {
                                         // Check if they are online.
                                         if(UserManager.getIfOnline(user)){
                                             // Check if device has enough storage.
+                                            user.setUserID(s.getKey());
                                             availibleUsers.add(user);
                                         }
                                     }
@@ -155,8 +158,28 @@ public class UploadController extends Activity {
         thread.start();
     }
 
+    // Distribute the chunks to all availible devices.
     private void selectDevicesForFiles(ArrayList<ChunkFile> chunks, ArrayList<User> availibleDevices){
-        //TODO: update firebase with the chunk names and the location the uid they should go to.
+        // Link to the root of firebase.
+        DatabaseReference ref = UserManager.userDatabaseReference.getParent();
+        // Hash the file name to get a unique id for file on firebase.
+        int hashRes = chunks.get(0).getOriginalname().hashCode();
+        String fileID = Integer.toHexString(hashRes);
+        // Create a file for use in firebase.
+        PSFile file = new PSFile(chunks.size(), chunks.get(0).getFile().length(), chunks.get(0).getFile().getName());
+        // Create a new file in firebase.
+        ref.child("files").child(fileID).setValue(file);
+
+        // Go through all chunks
+        for(ChunkFile c : chunks){
+            //TODO: make this a correct one.
+            String deviceID = availibleDevices.get(0).getUserID();
+            // Create a link so each device knows what file to download.
+            ChunkLink link = new ChunkLink(deviceID, file.getFileName(), fileID);
+            // Put the link on firebase
+            ref.child("chunks").child(UserManager.user.getUid()).child(fileID).push().setValue(link);
+        }
+
     }
 
     // Uploads the chunks to the server.
@@ -177,7 +200,6 @@ public class UploadController extends Activity {
         for(ChunkFile chunk : chunks){
             smr.addFile(chunk.getFile().getName(), chunk.getFile().getAbsolutePath());
         }
-
         smr.addStringParam("uid", UserManager.user.getUid());
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         queue.add(smr);

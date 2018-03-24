@@ -1,4 +1,4 @@
-package com.aaronnebbs.peersplitandroidapplication.Helpers.Network;
+package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.content.SharedPreferences;
 import com.aaronnebbs.peersplitandroidapplication.Model.PrivateKeyPair;

@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.CryptoHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
@@ -92,7 +92,9 @@ public class LoginController extends Activity {
                                 // Set shared preferences.
                                 SettingsHelper.setLoginDetails(usernameStr, passwordStr);
                                 // Set the user information that is put into the database.
-                                UserManager.userAccount = new User(UserManager.user.getDisplayName(), SettingsHelper.getStorageAmount(), SettingsHelper.getChunkStorage(), LoginController.this);
+                                UserManager.userAccount = new User(UserManager.user.getDisplayName(),
+                                        SettingsHelper.getStorageAmount(), SettingsHelper.getChunkStorage(),
+                                        LoginController.this, UserManager.user.getUid());
                                 // Updates the user information in the firebase app, mainly for the update of time.
                                 // Used to check if a user is still online.
                                 UserManager.updateUser();
@@ -136,7 +138,7 @@ public class LoginController extends Activity {
         // Only run the background task if you have logged in.
         if(UserManager.loggedIn){
 //            Intent serviceIntent = new Intent(this,BackgroundService.class);
-//            serviceIntent.putExtra("uid", UserManager.user.getUid());
+//            serviceIntent.putExtra("uid", UserManager.user.getUserID());
 //            stopService(serviceIntent);
 //            startService(serviceIntent);
 
