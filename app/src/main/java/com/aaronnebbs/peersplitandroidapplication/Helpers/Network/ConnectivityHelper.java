@@ -23,7 +23,6 @@ public class ConnectivityHelper{
 
 
     public static long getEpochMinute(){
-
         new Thread() {
             public void run() {
                 try {

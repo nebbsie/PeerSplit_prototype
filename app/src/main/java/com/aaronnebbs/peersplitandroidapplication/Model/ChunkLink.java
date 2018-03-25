@@ -7,21 +7,12 @@ package com.aaronnebbs.peersplitandroidapplication.Model;
 public class ChunkLink {
     private String userID;
     private String fileName;
-    private String fileID;
 
-    public ChunkLink(String userID, String fileName, String fileID) {
+    public ChunkLink(String userID, String fileName) {
         this.userID = userID;
         this.fileName = fileName;
-        this.fileID = fileID;
     }
 
-    public String getFileID() {
-        return fileID;
-    }
-
-    public void setFileID(String fileID) {
-        this.fileID = fileID;
-    }
 
     public String getUserID() {
         return userID;

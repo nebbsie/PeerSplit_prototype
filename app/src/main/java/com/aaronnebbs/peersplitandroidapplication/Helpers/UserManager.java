@@ -15,6 +15,8 @@ import java.util.Date;
 
 public class UserManager {
 
+    public static boolean DEBUGMODE = false;
+
     public static FirebaseAuth authentication;
     public static FirebaseUser user;
     public static FirebaseDatabase database;

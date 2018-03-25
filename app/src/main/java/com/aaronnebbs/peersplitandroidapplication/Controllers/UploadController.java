@@ -4,38 +4,44 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.error.VolleyError;
-import com.android.volley.request.SimpleMultiPartRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.util.ArrayList;
-
+import java.util.List;
 import az.plainpie.PieView;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UploadController extends Activity {
-
     private static final int READ_REQUEST_CODE = 42;
     private PieView uploadingChart;
     private LinearLayout selectedFileLayout;
@@ -47,6 +53,8 @@ public class UploadController extends Activity {
     private ProgressBar loadingBar;
     private TextView fileStatus;
     private Button goBack;
+    private ArrayList<ChunkFile> chunks;
+    private ArrayList<User> availibleUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +82,6 @@ public class UploadController extends Activity {
                 selectionMode();
             }
         });
-
         goBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,13 +91,12 @@ public class UploadController extends Activity {
         });
     }
 
-
     // Copies files from the local file system into a new file.
     private void copyFileForUpload(final Intent data){
         // Set ui to show file loading.
         loadingMode();
         // Get a copy of the file on a seperate thread to not lockup the ui.
-        Thread thread = new Thread(new Runnable() {
+        final Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 //Get name and size of file for the UI.
@@ -103,19 +109,19 @@ public class UploadController extends Activity {
                     // Get a copy of the file.
                     File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
                     // Compress the file.
-                    fileStatus.setText("Compressing File");
+                    //fileStatus.setText("Compressing File");
                     File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
                     // Generate a private key
                     byte[] key = CryptoHelper.generateKey(fileCopy.getName());
                     // Encrypt the file.
-                    fileStatus.setText("Encrypting File");
+                    //fileStatus.setText("Encrypting File");
                     final File encr = FileHelper.encrypt(key, compressedFile, compressedFile, true);
 
                     // Get the availible devices for storage.
                     UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            ArrayList<User> availibleUsers = new ArrayList<>();
+                            availibleUsers = new ArrayList<>();
                             for(DataSnapshot s : dataSnapshot.getChildren()){
                                 User user = s.getValue(User.class);
                                 // Dont add users if they are own device.
@@ -133,11 +139,18 @@ public class UploadController extends Activity {
                             }
                             System.out.println(availibleUsers.size() + " users found.");
                             // Split the file into chunks.
-                            final ArrayList<ChunkFile> chunks = FileHelper.splitFileIntoChunks(encr, true, availibleUsers.size());
-                            // Selects what devices will recieve the chunks.
-                            selectDevicesForFiles(chunks, availibleUsers);
-                            // Upload the chunks to the server.
-                            uploadChunks(chunks);
+                            if(availibleUsers.size() == 0){
+                                // Notify that no devices to distribute to.
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "No active devices to distribute to :(", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                return;
+                            }else{
+                                chunks = FileHelper.splitFileIntoChunks(encr, true, availibleUsers.size());
+                            }
                         }
                         @Override
                         public void onCancelled(DatabaseError databaseError) {}
@@ -166,43 +179,80 @@ public class UploadController extends Activity {
         int hashRes = chunks.get(0).getOriginalname().hashCode();
         String fileID = Integer.toHexString(hashRes);
         // Create a file for use in firebase.
-        PSFile file = new PSFile(chunks.size(), chunks.get(0).getFile().length(), chunks.get(0).getFile().getName());
+        PSFile file = new PSFile(chunks.size(), chunks.get(0).getFile().length(), chunks.get(0).getOriginalname());
         // Create a new file in firebase.
         ref.child("files").child(fileID).setValue(file);
-
+        int availibleCounter = 0;
         // Go through all chunks
         for(ChunkFile c : chunks){
-            //TODO: make this a correct one.
-            String deviceID = availibleDevices.get(0).getUserID();
+            // Make sure counter does not go over the max.
+            if(availibleCounter > availibleDevices.size()){
+                availibleCounter = 0;
+            }
+            availibleCounter = 0;
+            String deviceID = availibleDevices.get(availibleCounter).getUserID();
             // Create a link so each device knows what file to download.
-            ChunkLink link = new ChunkLink(deviceID, file.getFileName(), fileID);
+            ChunkLink link = new ChunkLink(deviceID, c.getFile().getName());
             // Put the link on firebase
             ref.child("chunks").child(UserManager.user.getUid()).child(fileID).push().setValue(link);
+            availibleCounter +=1;
         }
-
     }
 
     // Uploads the chunks to the server.
-    private void uploadChunks(ArrayList<ChunkFile> chunks){
-        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, "http://10.0.2.2/peersplit/upload.php", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                System.out.println("UPLOADED");
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+    private void uploadChunks(final ArrayList<ChunkFile> chunks){
+        Gson gson = new GsonBuilder().setLenient().create();
 
-                System.out.println(error.getMessage());
+        // Create the base retrofit file.
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl("http://peersplit.com/")
+                .addConverterFactory(GsonConverterFactory.create(gson));
+
+        // Create  a retrofit object.
+        Retrofit retrofit = builder.build();
+
+        // Link retrofit to PeerSplitClient class.
+        PeerSplitClient psc = retrofit.create(PeerSplitClient.class);
+
+        // Add each of the files to the params.
+        List<MultipartBody.Part> partList = new ArrayList<>();
+        for(ChunkFile f : chunks){
+            partList.add(prepareFilePart(f.getFile().getName(), f.getFile()));
+        }
+
+        // Set the responce to the uploadfiles.
+        Call<ResponseBody> call = psc.uploadMultipleFilesDynamic(createPartFromString(UserManager.user.getUid()),partList);
+
+
+        // Start the upload and set the callback.
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Toast.makeText(getApplicationContext(), "Uploaded files!", Toast.LENGTH_SHORT).show();
+                // Selects what devices will recieve the chunks.
+                selectDevicesForFiles(chunks, availibleUsers);
+                uploadMode();
+                fileStatus.setText("UPLOADED FILE");
+                uploadingChart.setPercentage(100);
+                uploadingChart.setInnerText("100%");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Failed to upload files!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
-        for(ChunkFile chunk : chunks){
-            smr.addFile(chunk.getFile().getName(), chunk.getFile().getAbsolutePath());
-        }
-        smr.addStringParam("uid", UserManager.user.getUid());
-        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        queue.add(smr);
+    @NonNull
+    private RequestBody createPartFromString(String descriptionString) {
+        return RequestBody.create(okhttp3.MultipartBody.FORM, descriptionString);
+    }
+
+    @NonNull
+    private MultipartBody.Part prepareFilePart(String partName, File file) {
+        RequestBody rb = RequestBody.create(MediaType.parse("gz"), file);
+        return MultipartBody.Part.createFormData(partName, file.getName(), rb);
     }
 
     // Opens the file picker
@@ -227,6 +277,10 @@ public class UploadController extends Activity {
     // Attempt to upload file.
     private void attemptUpload(){
         System.out.println("Attempting Upload");
+        // Upload the chunks to the server.
+        loadingMode();
+        fileStatus.setText("UPLOADING FILE");
+        uploadChunks(chunks);
     }
 
     // Sets the file upload parts to visible and hides the select file button to invisible.
