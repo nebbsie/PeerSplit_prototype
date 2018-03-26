@@ -10,10 +10,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
+import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,12 +40,7 @@ public class HomeFragment extends Fragment {
         adapter = new BottomNavBarAdapter(dataModels, getContext());
         listView.setAdapter(adapter);
 
-        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
-        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
-        dataModels.add(new HomePageRow("aar.jpg", "500gb"));
-        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
-        dataModels.add(new HomePageRow("aar.mp4", "500gb"));
-        dataModels.add(new HomePageRow("aar.txt", "500gb"));
+        getAllFilesBeingStored();
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -49,6 +51,27 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void getAllFilesBeingStored(){
+        FileHelper.ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                dataModels.clear();
+                // For each file that is the users, add to the home page.
+                for (DataSnapshot file : dataSnapshot.getChildren()){
+                    PSFile f = file.getValue(PSFile.class);
+                    if(f.getOwnerID().equals(UserManager.user.getUid())){
+                        dataModels.add(new HomePageRow(f.getFileName(), FileHelper.getFileSizeString(f.getTotalSize()), file.getKey()));
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     @Override
     public void onResume() {

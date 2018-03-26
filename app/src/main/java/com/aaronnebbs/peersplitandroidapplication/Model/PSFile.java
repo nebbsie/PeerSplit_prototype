@@ -8,11 +8,35 @@ public class PSFile {
     private int chunkAmount;
     private long chunkSize;
     private String fileName;
+    private String ownerID;
+    private long totalSize;
 
-    public PSFile(int chunkAmount, long chunkSize, String fileName) {
+    public PSFile(){
+
+    }
+
+    public PSFile(int chunkAmount, long chunkSize, String fileName, String ownerID, long totalSize) {
         this.chunkAmount = chunkAmount;
         this.chunkSize = chunkSize;
         this.fileName = fileName;
+        this.ownerID = ownerID;
+        this.totalSize =totalSize;
+    }
+
+    public long getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(long totalSize) {
+        this.totalSize = totalSize;
+    }
+
+    public String getOwnerID() {
+        return ownerID;
+    }
+
+    public void setOwnerID(String ownerID) {
+        this.ownerID = ownerID;
     }
 
     public int getChunkAmount() {

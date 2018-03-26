@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Pair;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
+import com.google.firebase.database.DatabaseReference;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,7 +32,12 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class FileHelper {
 
+    public static DatabaseReference ref;
     private static int blockSize = 1024;
+
+    public static void setup(){
+        ref = UserManager.database.getReference().child("files");
+    }
 
     // Splits a file into chunks and returns an array with the files.
     public static ArrayList<ChunkFile> splitFileIntoChunks(File input, boolean deleteOriginalFile, int onlineDevices){

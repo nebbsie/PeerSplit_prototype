@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
@@ -70,6 +71,8 @@ public class LoginController extends Activity {
         CryptoHelper.setup();
         // Setup the chunk helper.
         ChunkHelper.setup();
+        // File helper setup.
+        FileHelper.setup();
     }
 
     // Attempts to login user.

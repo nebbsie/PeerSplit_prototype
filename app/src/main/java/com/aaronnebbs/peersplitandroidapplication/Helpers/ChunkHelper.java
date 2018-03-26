@@ -1,10 +1,13 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
@@ -22,6 +25,7 @@ public class ChunkHelper {
         getStoredChunks();
     }
 
+    // Gets the chunks stored in memory.
     public static ArrayList<ChunkFile> getStoredChunks(){
         String chunks = prefs.getString(CHUNKS, "NULL");
         if(!chunks.equals("NULL")){
@@ -34,6 +38,7 @@ public class ChunkHelper {
         prefs.edit().putString(CHUNKS, new Gson().toJson(storedChunks)).apply();
     }
 
+    // Searches the chunks that are currently stored to check if it contains another.
     public static boolean searchForChunk(String name){
         getStoredChunks();
         for(ChunkFile f : storedChunks){
@@ -51,6 +56,21 @@ public class ChunkHelper {
 
     public static void clearStoredChunks(){
         storedChunks = new ArrayList<>();
+        setStoredChunks();
+    }
+
+    // Deletes un needed chunks.
+    public static void deleteChunks(ArrayList<ChunkFile> chunksToDelete, Context context){
+        for(ChunkFile c : chunksToDelete){
+            String folderName = c.getOriginalname().substring(0, c.getOriginalname().length() - 10);
+            String filePath = context.getFilesDir().getPath()+"/chunks/"+folderName+"/"+c.getFile().getName();
+            File f = new File(filePath);
+            f.delete();
+            if(f.getParentFile().list().length == 0){
+                f.getParentFile().delete();
+            }
+        }
+        storedChunks.removeAll(chunksToDelete);
         setStoredChunks();
     }
 

@@ -13,6 +13,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ChunkDownloader;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
@@ -28,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -53,10 +55,7 @@ public class HomeController extends FragmentActivity implements Serializable {
         setContentView(R.layout.home_activity);
 
         firstTime = true;
-        homeActivity = new HomeFragment();
-        overviewActivity = new OverviewFragment();
-        profileActivity = new ProfileFragment();
-        settingsActivity = new SettingsFragment();
+
 
         // If the user is not valid, go back to login page.
         if(UserManager.user == null){
@@ -74,6 +73,12 @@ public class HomeController extends FragmentActivity implements Serializable {
             // Handles all of the chunk interactions.
             setupChunkListener();
         }
+
+        homeActivity = new HomeFragment();
+        overviewActivity = new OverviewFragment();
+        profileActivity = new ProfileFragment();
+        settingsActivity = new SettingsFragment();
+
         setupFragments();
     }
 
@@ -87,6 +92,8 @@ public class HomeController extends FragmentActivity implements Serializable {
                 ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        // Used to see if files are on device that don't need to be.
+                        ArrayList<ChunkFile> filesOnBoard = ChunkHelper.getStoredChunks();
                         // Each user
                         for(DataSnapshot user : dataSnapshot.getChildren()){
                             User _user = user.getValue(User.class);
@@ -112,13 +119,23 @@ public class HomeController extends FragmentActivity implements Serializable {
                                                 ChunkDownloader cd = new ChunkDownloader(c, _user.getUserID(),file.getKey() ,chunk.getKey());
                                                 cd.execute(c.getChunkName(), fileToDownload, getFilesDir().getPath()+"/chunks/"+c.getFileName());
                                             }else{
-                                                System.out.println("Already Have Chunk");
+                                                // Check if local storage has files that have been deleted from cloud and are no longer needing to be hosted.
+                                                ArrayList<ChunkFile> toDelete = new ArrayList<>();
+                                                // Go through each file and
+                                                for(ChunkFile cf : filesOnBoard){
+                                                    if(c.getChunkName().equals(cf.getOriginalname())){
+                                                        toDelete.add(cf);
+                                                    }
+                                                }
+                                                filesOnBoard.removeAll(toDelete);
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                        // Delete un needed chunks.
+                        ChunkHelper.deleteChunks(filesOnBoard, getApplicationContext());
                     }
 
                     @Override

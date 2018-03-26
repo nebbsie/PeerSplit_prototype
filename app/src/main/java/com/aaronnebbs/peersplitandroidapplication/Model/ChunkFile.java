@@ -6,6 +6,7 @@ public class ChunkFile {
     private File file;
     private String originalname;
     private long size;
+    private long originalFileSize;
 
     public ChunkFile(File file, String name, long size){
         this.file = file;

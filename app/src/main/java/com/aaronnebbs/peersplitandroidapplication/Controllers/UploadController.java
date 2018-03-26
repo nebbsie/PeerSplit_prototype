@@ -56,6 +56,7 @@ public class UploadController extends Activity {
     private Button goBack;
     private ArrayList<ChunkFile> chunks;
     private ArrayList<User> availibleUsers;
+    private long orignalFileSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +110,7 @@ public class UploadController extends Activity {
                 try {
                     // Get a copy of the file.
                     File fileCopy = FileHelper.getFileFromURI(uri, UploadController.this);
+                    orignalFileSize = fileCopy.length();
                     // Compress the file.
                     //fileStatus.setText("Compressing File");
                     File compressedFile = FileHelper.compress(fileCopy, fileCopy, true);
@@ -172,6 +174,7 @@ public class UploadController extends Activity {
         thread.start();
     }
 
+
     // Distribute the chunks to all availible devices.
     private void selectDevicesForFiles(ArrayList<ChunkFile> chunks, ArrayList<User> availibleDevices){
         // Link to the root of firebase.
@@ -179,8 +182,9 @@ public class UploadController extends Activity {
         // Hash the file name to get a unique id for file on firebase.
         int hashRes = chunks.get(0).getOriginalname().hashCode();
         String fileID = Integer.toHexString(hashRes);
+        String nameWithoutEncoding = chunks.get(0).getOriginalname().substring(0, chunks.get(0).getOriginalname().length() - 6);
         // Create a file for use in firebase.
-        PSFile file = new PSFile(chunks.size(), chunks.get(0).getFile().length(), chunks.get(0).getOriginalname());
+        PSFile file = new PSFile(chunks.size(), chunks.get(0).getFile().length(), nameWithoutEncoding, UserManager.user.getUid(), orignalFileSize);
         // Create a new file in firebase.
         ref.child("files").child(fileID).setValue(file);
         int availibleCounter = 0;
