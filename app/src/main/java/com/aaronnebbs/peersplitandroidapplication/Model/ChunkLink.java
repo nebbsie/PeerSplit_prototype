@@ -6,17 +6,36 @@ package com.aaronnebbs.peersplitandroidapplication.Model;
 
 public class ChunkLink {
     private String userID;
+    private String chunkName;
     private String fileName;
+    private boolean beingStored;
 
     public ChunkLink(){
 
     }
 
-    public ChunkLink(String userID, String fileName) {
+    public ChunkLink(String userID, String chunkName, String fileName) {
         this.userID = userID;
+        this.chunkName = chunkName;
         this.fileName = fileName;
+        this.beingStored = false;
     }
 
+    public boolean isBeingStored() {
+        return beingStored;
+    }
+
+    public void setBeingStored(boolean beingStored) {
+        this.beingStored = beingStored;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public String getUserID() {
         return userID;
@@ -26,12 +45,12 @@ public class ChunkLink {
         this.userID = userID;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getChunkName() {
+        return chunkName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setChunkName(String chunkName) {
+        this.chunkName = chunkName;
     }
 
 

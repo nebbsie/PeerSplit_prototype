@@ -5,15 +5,15 @@ import java.io.File;
 public class ChunkFile {
     private File file;
     private String originalname;
-    private int size;
+    private long size;
 
-    public ChunkFile(File file, String name, int size){
+    public ChunkFile(File file, String name, long size){
         this.file = file;
         this.originalname = name;
         this.size = size;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
@@ -189,10 +190,11 @@ public class UploadController extends Activity {
             if(availibleCounter > availibleDevices.size()){
                 availibleCounter = 0;
             }
+            //TODO: remove
             availibleCounter = 0;
             String deviceID = availibleDevices.get(availibleCounter).getUserID();
             // Create a link so each device knows what file to download.
-            ChunkLink link = new ChunkLink(deviceID, c.getFile().getName());
+            ChunkLink link = new ChunkLink(deviceID, c.getFile().getName(), file.getFileName());
             // Put the link on firebase
             ref.child("chunks").child(UserManager.user.getUid()).child(fileID).push().setValue(link);
             availibleCounter +=1;
@@ -217,11 +219,11 @@ public class UploadController extends Activity {
         // Add each of the files to the params.
         List<MultipartBody.Part> partList = new ArrayList<>();
         for(ChunkFile f : chunks){
-            partList.add(prepareFilePart(f.getFile().getName(), f.getFile()));
+            partList.add(ConnectivityHelper.prepareFilePart(f.getFile().getName(), f.getFile()));
         }
 
         // Set the responce to the uploadfiles.
-        Call<ResponseBody> call = psc.uploadMultipleFilesDynamic(createPartFromString(UserManager.user.getUid()),partList);
+        Call<ResponseBody> call = psc.uploadMultipleFilesDynamic(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),partList);
 
 
         // Start the upload and set the callback.
@@ -244,16 +246,7 @@ public class UploadController extends Activity {
         });
     }
 
-    @NonNull
-    private RequestBody createPartFromString(String descriptionString) {
-        return RequestBody.create(okhttp3.MultipartBody.FORM, descriptionString);
-    }
 
-    @NonNull
-    private MultipartBody.Part prepareFilePart(String partName, File file) {
-        RequestBody rb = RequestBody.create(MediaType.parse("gz"), file);
-        return MultipartBody.Part.createFormData(partName, file.getName(), rb);
-    }
 
     // Opens the file picker
     private void selectFile(){

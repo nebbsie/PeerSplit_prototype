@@ -18,4 +18,9 @@ public interface PeerSplitClient {
             @Part List<MultipartBody.Part> files
     );
 
+    @POST("/api/download.php")
+    Call<ResponseBody> downloadFileWithFixedUrl(
+            @Part("fileToDownload") RequestBody fileToDownload
+    );
+
 }

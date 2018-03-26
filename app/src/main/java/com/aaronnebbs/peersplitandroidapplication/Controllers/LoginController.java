@@ -39,6 +39,7 @@ public class LoginController extends Activity {
         setupHelpers();
         // Setup the user interface.
         setupUI();
+        ChunkHelper.clearStoredChunks();
         // Check if the application needs to auto login.
         if(SettingsHelper.AUTO_LOGIN){
             attemptAutoLogin();

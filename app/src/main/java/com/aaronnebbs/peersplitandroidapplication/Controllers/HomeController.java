@@ -8,6 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
+
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ChunkDownloader;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
@@ -20,8 +24,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
+
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class HomeController extends FragmentActivity implements Serializable {
     // Bottom navigation bar used on all pages.
@@ -63,13 +72,13 @@ public class HomeController extends FragmentActivity implements Serializable {
             // Update the user in the cloud.
             UserManager.updateUserInCloud(getApplicationContext());
             // Handles all of the chunk interactions.
-            setupChunkListner();
+            setupChunkListener();
         }
         setupFragments();
     }
 
     // Chunk listener does all chunk downloading/uploading.
-    private void setupChunkListner(){
+    private void setupChunkListener(){
         // Thread used to download chunks to device.
         Thread t = new Thread(new Runnable() {
             @Override
@@ -91,13 +100,24 @@ public class HomeController extends FragmentActivity implements Serializable {
                                         ChunkLink c = chunk.getValue(ChunkLink.class);
                                         // Check if the chunk is for the current user.
                                         if(c.getUserID().equals(UserManager.user.getUid())){
-                                            // Check if they have the chunk already, if not, download it.
-                                            System.out.println("My Chunk: " + chunk.getKey() + " Name: " + c.getFileName());
+                                            // If don't have the chunk in memory, download it.
+                                            if(!ChunkHelper.searchForChunk(c.getChunkName())){
+                                                // Get name of folder (filename no fullstops)
+                                                String fileNameNoDots = c.getFileName().replace(".","");
+                                                // Take the encoding and compression markings away
+                                                fileNameNoDots = fileNameNoDots.substring(0, fileNameNoDots.length() - 5);
+                                                // Concat to create download URL
+                                                String fileToDownload = _user.getUserID() + "/" + fileNameNoDots + "/" + c.getChunkName();
+                                                // Download file
+                                                ChunkDownloader cd = new ChunkDownloader(c, _user.getUserID(),file.getKey() ,chunk.getKey());
+                                                cd.execute(c.getChunkName(), fileToDownload, getFilesDir().getPath()+"/chunks/"+c.getFileName());
+                                            }else{
+                                                System.out.println("Already Have Chunk");
+                                            }
                                         }
                                     }
                                 }
                             }
-
                         }
                     }
 
