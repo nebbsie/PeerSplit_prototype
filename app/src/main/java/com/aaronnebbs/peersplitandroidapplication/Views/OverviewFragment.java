@@ -62,6 +62,11 @@ public class OverviewFragment extends Fragment {
                 // Clout storage calculations
                 long usedSpace = (totalStorageUsed / 1024) / 1024;
                 double percentage = ((double)usedSpace / (double)UserManager.cloudStorageLimit) * 100;
+
+                if(percentage == 0){
+                    percentage = 1;
+                }
+
                 long free = UserManager.cloudStorageLimit - usedSpace;
                 cloudStorageChart.setPercentage((float)percentage);
                 cloudStorageChart.setInnerText(free + " MB/"+UserManager.cloudStorageLimit+" MB");
@@ -69,6 +74,7 @@ public class OverviewFragment extends Fragment {
                 // Chunk storage ui
                 chunksCreatedByUser.setText(""+totalChunksCreated);
                 chunksStoredByUser.setText(""+ChunkHelper.getStoredChunks().size());
+
 
             }
 

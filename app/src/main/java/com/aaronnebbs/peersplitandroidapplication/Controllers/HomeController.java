@@ -1,5 +1,6 @@
 package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -7,7 +8,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ChunkDownloader;
@@ -34,7 +41,7 @@ import java.util.ArrayList;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class HomeController extends FragmentActivity implements Serializable {
+public class HomeController extends FragmentActivity implements Serializable, GestureDetector.OnGestureListener {
     // Bottom navigation bar used on all pages.
     private BottomNavigationViewEx navBar;
     private long lastNumber;
@@ -48,6 +55,7 @@ public class HomeController extends FragmentActivity implements Serializable {
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
 
+
     // Called when the page is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +63,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         setContentView(R.layout.home_activity);
 
         firstTime = true;
-
 
         // If the user is not valid, go back to login page.
         if(UserManager.user == null){
@@ -250,6 +257,37 @@ public class HomeController extends FragmentActivity implements Serializable {
     protected void onDestroy() {
         System.out.println("on destroy");
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        System.out.println("FLING");
+        return false;
     }
 }
 

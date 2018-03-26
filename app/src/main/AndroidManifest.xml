@@ -27,11 +27,6 @@
         <activity android:name=".Controllers.UploadController" />
         <activity android:name=".Controllers.WelcomeController"/>
 
-        <service
-            android:name=".Controllers.ForegroundService"
-            android:enabled="true"
-            android:stopWithTask="false" />
-
     </application>
 
 </manifest>

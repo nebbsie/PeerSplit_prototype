@@ -60,7 +60,9 @@ public class HomeFragment extends Fragment {
                 for (DataSnapshot file : dataSnapshot.getChildren()){
                     PSFile f = file.getValue(PSFile.class);
                     if(f.getOwnerID().equals(UserManager.user.getUid())){
+
                         dataModels.add(new HomePageRow(f.getFileName(), FileHelper.getFileSizeString(f.getTotalSize()), file.getKey()));
+
                     }
                 }
                 adapter.notifyDataSetChanged();
