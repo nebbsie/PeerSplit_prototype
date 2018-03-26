@@ -142,7 +142,7 @@
                         android:id="@+id/moneyEarned"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="£3.46"
+                        android:text="££.££"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="30sp" />
