@@ -10,9 +10,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
+import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
+import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 
@@ -22,6 +30,8 @@ public class OverviewFragment extends Fragment {
 
     private PieView cloudStorageChart;
     private PieView localStorageChart;
+    private TextView chunksCreatedByUser;
+    private TextView chunksStoredByUser;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
@@ -29,16 +39,53 @@ public class OverviewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupUI();
         updateUI();
+        setupListenerForChunkData();
+    }
+
+    private void setupListenerForChunkData(){
+        FileHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                long totalStorageUsed = 0;
+                long totalChunksCreated = 0;
+
+                // For each file that is the users, add to the home page.
+                for (DataSnapshot file : dataSnapshot.getChildren()){
+                    PSFile f = file.getValue(PSFile.class);
+                    if(f.getOwnerID().equals(UserManager.user.getUid())){
+                        totalChunksCreated += f.getChunkAmount();
+                        totalStorageUsed += f.getTotalSize();
+                    }
+                }
+
+                // Clout storage calculations
+                long usedSpace = (totalStorageUsed / 1024) / 1024;
+                double percentage = ((double)usedSpace / (double)UserManager.cloudStorageLimit) * 100;
+                long free = UserManager.cloudStorageLimit - usedSpace;
+                cloudStorageChart.setPercentage((float)percentage);
+                cloudStorageChart.setInnerText(free + " MB/"+UserManager.cloudStorageLimit+" MB");
+
+                // Chunk storage ui
+                chunksCreatedByUser.setText(""+totalChunksCreated);
+                chunksStoredByUser.setText(""+ChunkHelper.getStoredChunks().size());
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void updateUI(){
-        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        long bytesAvailable = (long)stat.getBlockSize() *(long)stat.getBlockCount();
-        long megAvailable = bytesAvailable / 1048576;
-        System.out.println("BYTES: " + megAvailable);
-        localStorageChart.setPercentage((261f/532f)*100);
-        localStorageChart.setInnerText("" + getPhoneSizeUsedBytes() + "/" + getPhoneSizeBytes() );
+        long usedSpace = ( getPhoneSizeUsedBytes() / 1024 ) / 1024;
+        long totalSpace = ( getPhoneSizeBytes() / 1024 ) / 1024;
+        double percentage =  ( (double)usedSpace / (double)totalSpace ) * 100;
+        localStorageChart.setPercentage((float)percentage);
+        localStorageChart.setInnerText("" + FileHelper.getFileSizeString(getPhoneSizeUsedBytes()) + "/" + FileHelper.getFileSizeString(getPhoneSizeBytes()) );
     }
 
     // Links UI elements and sets the design for the progress bar.
@@ -46,6 +93,10 @@ public class OverviewFragment extends Fragment {
         // Setup the pie charts
         cloudStorageChart = getView().findViewById(R.id.cloudStoragePieChart);
         localStorageChart = getView().findViewById(R.id.localStoragePieChart);
+
+        chunksCreatedByUser = getView().findViewById(R.id.chunksCreatedByYou);
+        chunksStoredByUser = getView().findViewById(R.id.chunksYouAreStoring);
+
         // Set bar colour
         cloudStorageChart.setPercentageBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         localStorageChart.setPercentageBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -68,7 +119,7 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println("YO RESUMING NOW");
+        chunksStoredByUser.setText(""+ChunkHelper.getStoredChunks().size());
     }
 
     @Override
@@ -82,21 +133,21 @@ public class OverviewFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public String getPhoneSizeUsedBytes() {
+    public long getPhoneSizeUsedBytes() {
         File p = Environment.getDataDirectory();
         StatFs s = new StatFs(p.getPath());
         long blockSize = s.getBlockSizeLong();
         long availableBlocks = s.getAvailableBlocksLong();
-        return FileHelper.getFileSizeString(availableBlocks * blockSize);
+        return (availableBlocks * blockSize);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public String getPhoneSizeBytes() {
+    public long getPhoneSizeBytes() {
         File p = Environment.getDataDirectory();
         StatFs s = new StatFs(p.getPath());
         long blockSize = s.getBlockSizeLong();
         long totalBlocks = s.getBlockCountLong();
-        return  FileHelper.getFileSizeString(totalBlocks * blockSize);
+        return  (totalBlocks * blockSize);
     }
 
 

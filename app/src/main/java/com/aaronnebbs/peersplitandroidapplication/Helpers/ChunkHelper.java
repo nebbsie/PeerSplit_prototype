@@ -49,6 +49,21 @@ public class ChunkHelper {
         return false;
     }
 
+    public static int getAmountOfChunksStored(){
+        getStoredChunks();
+        return storedChunks.size();
+    }
+    public static long getCurrentChunksStoredSize(){
+        getStoredChunks();
+
+        long counter = 0;
+        for(ChunkFile c : storedChunks){
+            counter += c.getSize();
+        }
+        return counter;
+    }
+
+
     public static void addStoredChunk(ChunkFile fileIn){
         storedChunks.add(fileIn);
         setStoredChunks();
@@ -66,9 +81,13 @@ public class ChunkHelper {
             String filePath = context.getFilesDir().getPath()+"/chunks/"+folderName+"/"+c.getFile().getName();
             File f = new File(filePath);
             f.delete();
-            if(f.getParentFile().list().length == 0){
-                f.getParentFile().delete();
+
+            if(f.exists()){
+                if(f.getParentFile().list().length == 0){
+                    f.getParentFile().delete();
+                }
             }
+
         }
         storedChunks.removeAll(chunksToDelete);
         setStoredChunks();

@@ -28,6 +28,7 @@ public class UserManager {
     public static boolean alreadyRunning = false;
     private static Handler handler;
     private static int delay = 10000;
+    public static int cloudStorageLimit = 100;
 
     // Setup the static variables.
     public static void setup(){

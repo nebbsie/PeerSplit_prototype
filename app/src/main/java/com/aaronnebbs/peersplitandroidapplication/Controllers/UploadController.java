@@ -241,6 +241,7 @@ public class UploadController extends Activity {
                 fileStatus.setText("UPLOADED FILE");
                 uploadingChart.setPercentage(100);
                 uploadingChart.setInnerText("100%");
+                uploadButton.setVisibility(View.INVISIBLE);
             }
 
             @Override
