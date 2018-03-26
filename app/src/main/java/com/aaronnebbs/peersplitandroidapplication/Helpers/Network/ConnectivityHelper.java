@@ -40,27 +40,10 @@ public class ConnectivityHelper{
         return CURERNTTIME;
     }
 
-    // Gets the IPAddress of the device.
-    public static String getPublicIPAddress(){
-        new Thread() {
-            public void run() {
-                try {
-                    URL getIP = new URL("http://checkip.amazonaws.com");
-                    BufferedReader in = new BufferedReader(new InputStreamReader(getIP.openStream()));
-                    IP_ADDRESS = in.readLine();
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-        return IP_ADDRESS;
-    }
 
     // Checks if the phone is using wifi or mobile networking.
-    public static void checkWifi(Activity act){
-        final ConnectivityManager connectivityManager = (ConnectivityManager) act.getSystemService(Context.CONNECTIVITY_SERVICE);
+    public static void checkWifi(Context act){
+        final ConnectivityManager connectivityManager = (ConnectivityManager) act.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo wifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         final NetworkInfo mobile = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 
@@ -77,13 +60,12 @@ public class ConnectivityHelper{
         }
     }
 
-    public static void update(Activity act){
-        getPublicIPAddress();
+    public static void update(Context act){
         canUploadChunk(act);
     }
 
     // Checks if the phone is allowed to upload.
-    public static boolean canUploadChunk(Activity act){
+    public static boolean canUploadChunk(Context act){
         try{
             checkWifi(act);
             if(USING_WIFI){
@@ -96,6 +78,7 @@ public class ConnectivityHelper{
                 return false;
             }
         }catch (NullPointerException e){
+            e.printStackTrace();
             System.out.println("Tired doing network check! Failed!");
             return CAN_UPLOAD;
         }

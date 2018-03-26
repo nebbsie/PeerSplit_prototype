@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
@@ -34,34 +35,40 @@ public class LoginController extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
-        ConnectivityHelper.getEpochMinute();
-
+        // Setup helpers.
+        setupHelpers();
         // Setup the user interface.
         setupUI();
+        // Check if the application needs to auto login.
+        if(SettingsHelper.AUTO_LOGIN){
+            attemptAutoLogin();
+        }
+    }
+
+    // Attempts auto login with params from shared prefs.
+    private void attemptAutoLogin(){
+        Toast.makeText(getApplicationContext(), "Attempting Auto-Login!", Toast.LENGTH_SHORT).show();
+        usernameStr = SettingsHelper.getEmail();
+        passwordStr = SettingsHelper.getPassword();
+        attemptLogin();
+    }
+
+    // Setup the handlers and shared prefs.
+    private void setupHelpers(){
+        // Get the current time from api.
+        ConnectivityHelper.getEpochMinute();
         // Setup the shared preferences.
         SettingsHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
         CryptoHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
+        ChunkHelper.prefs = getSharedPreferences("com.aaronnebbs.peersplitandroidapplication", Context.MODE_PRIVATE);
         // Setup the database links and also user.
         UserManager.setup();
         // Load values from the share preferences.
         SettingsHelper.setup();
         // Setup the crypto.
         CryptoHelper.setup();
-
-        // Check if the application needs to auto login.
-        if(SettingsHelper.AUTO_LOGIN){
-            usernameStr = SettingsHelper.getEmail();
-            passwordStr = SettingsHelper.getPassword();
-            attemptLogin();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Start the animation
-        this.overridePendingTransition(R.anim.push_right_enter, R.anim.push_right_exit);
+        // Setup the chunk helper.
+        ChunkHelper.setup();
     }
 
     // Attempts to login user.
@@ -132,18 +139,16 @@ public class LoginController extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Start the animation
+        this.overridePendingTransition(R.anim.push_right_enter, R.anim.push_right_exit);
+    }
+
+    @Override
     protected void onDestroy() {
         System.out.println("on destroy login");
-
-        // Only run the background task if you have logged in.
-        if(UserManager.loggedIn){
-//            Intent serviceIntent = new Intent(this,BackgroundService.class);
-//            serviceIntent.putExtra("uid", UserManager.user.getUserID());
-//            stopService(serviceIntent);
-//            startService(serviceIntent);
-
-        }
-
         super.onDestroy();
     }
+
 }

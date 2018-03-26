@@ -8,15 +8,19 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
-
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
+import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.aaronnebbs.peersplitandroidapplication.Views.HomeFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.OverviewFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.ProfileFragment;
 import com.aaronnebbs.peersplitandroidapplication.Views.SettingsFragment;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
-
 import java.io.Serializable;
 
 public class HomeController extends FragmentActivity implements Serializable {
@@ -24,6 +28,7 @@ public class HomeController extends FragmentActivity implements Serializable {
     private BottomNavigationViewEx navBar;
     private long lastNumber;
     private boolean firstTime;
+    private boolean alreadyRunning = false;
 
     // Fragments
     private Fragment selectedFragment;
@@ -31,18 +36,6 @@ public class HomeController extends FragmentActivity implements Serializable {
     private OverviewFragment overviewActivity;
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
-
-
-    @Override
-    protected void onStop() {
-        if(profileActivity.created){
-            profileActivity.onStop();
-        }
-        if(settingsActivity.created){
-            settingsActivity.onStop();
-        }
-        super.onStop();
-    }
 
     // Called when the page is created.
     @Override
@@ -56,12 +49,70 @@ public class HomeController extends FragmentActivity implements Serializable {
         profileActivity = new ProfileFragment();
         settingsActivity = new SettingsFragment();
 
+        // If the user is not valid, go back to login page.
+        if(UserManager.user == null){
+            Intent i = new Intent(getApplicationContext(), LoginController.class);
+            startActivity(i);
+        }
 
+        // Make the navigation bar look good.
         setupNavBar();
 
         // Setup a handler that every n seconds updates the database.
-        UserManager.setupStillOnlineHandler(this);
+        if(!alreadyRunning) {
+            // Update the user in the cloud.
+            UserManager.updateUserInCloud(getApplicationContext());
+            // Handles all of the chunk interactions.
+            setupChunkListner();
+        }
+        setupFragments();
+    }
 
+    // Chunk listener does all chunk downloading/uploading.
+    private void setupChunkListner(){
+        // Thread used to download chunks to device.
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DatabaseReference ref = UserManager.userDatabaseReference.getParent().child("chunks");
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // Each user
+                        for(DataSnapshot user : dataSnapshot.getChildren()){
+                            User _user = user.getValue(User.class);
+                            _user.setUserID(user.getKey());
+                            // Don't download own chunks.
+                            if(!_user.getUserID().equals(UserManager.user.getUid())){
+                                // Each file for user
+                                for(DataSnapshot file : user.getChildren()){
+                                    // Each chunk for each file
+                                    for(DataSnapshot chunk : file.getChildren()){
+                                        ChunkLink c = chunk.getValue(ChunkLink.class);
+                                        // Check if the chunk is for the current user.
+                                        if(c.getUserID().equals(UserManager.user.getUid())){
+                                            // Check if they have the chunk already, if not, download it.
+                                            System.out.println("My Chunk: " + chunk.getKey() + " Name: " + c.getFileName());
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+        t.start();
+    }
+
+    // Setup the fragment holder.
+    private void setupFragments(){
         // Setup the onclick listener for the bottom
         navBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -122,13 +173,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         transaction.commit();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        this.overridePendingTransition(R.anim.push_down_in, R.anim.push_down_out);
-        UserManager.loggedIn = true;
-    }
-
     // Setup the look and feel of the bottom navigation bar.
     private void setupNavBar(){
         // Setup the navigation bar.
@@ -148,9 +192,26 @@ public class HomeController extends FragmentActivity implements Serializable {
     }
 
     @Override
+    protected void onStop() {
+        if(profileActivity.created){
+            profileActivity.onStop();
+        }
+        if(settingsActivity.created){
+            settingsActivity.onStop();
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.overridePendingTransition(R.anim.push_down_in, R.anim.push_down_out);
+        UserManager.loggedIn = true;
+    }
+
+    @Override
     protected void onDestroy() {
         System.out.println("on destroy");
-
         super.onDestroy();
     }
 }

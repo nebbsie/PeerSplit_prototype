@@ -1,8 +1,10 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.os.PowerManager;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
@@ -49,26 +51,26 @@ public class UserManager {
         userDatabaseReference.child(user.getUid()).setValue(userAccount);
     }
 
-    public static void setupStillOnlineHandler(final Activity act){
+    public static void updateUserInCloud(final Context context){
 
-        if(!alreadyRunning){
-            System.out.println("Created Listener");
-            alreadyRunning = true;
-            handler.postDelayed(new Runnable(){
-                public void run(){
-                    System.out.println("Updated Firebase: " + user.getUid() + "  " + userAccount.getUsername());
-                    // Reload the data used for an update.
-                    SettingsHelper.setup();
-                    // Check if the user can upload chu
-                    ConnectivityHelper.update(act);
-                    updateUser();
-                    handler.postDelayed(this, delay);
-                }
-            }, delay);
-        }else{
-            System.out.println("Already Running! Don't need to start another!");
-        }
+        PowerManager mgr = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        final PowerManager.WakeLock wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakeLock");
+        wakeLock.acquire();
 
+        final Handler handler = new Handler();
+        final int delay = 5000; //milliseconds
+
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                System.out.println("Updated Firebase: " + UserManager.user.getUid() + "  " + UserManager.userAccount.getUsername());
+                // Reload the data used for an update.
+                SettingsHelper.setup();
+                // Check if the user can upload chu
+                ConnectivityHelper.update(context);
+                UserManager.updateUser();
+                handler.postDelayed(this, delay);
+            }
+        }, 0);
     }
 
     public static long getRemainingStorageSpace(){

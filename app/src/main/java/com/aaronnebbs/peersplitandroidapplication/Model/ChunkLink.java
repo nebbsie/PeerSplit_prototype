@@ -8,6 +8,10 @@ public class ChunkLink {
     private String userID;
     private String fileName;
 
+    public ChunkLink(){
+
+    }
+
     public ChunkLink(String userID, String fileName) {
         this.userID = userID;
         this.fileName = fileName;
