@@ -91,6 +91,7 @@ public class UploadController extends Activity {
                 startActivity(i);
             }
         });
+
     }
 
     // Copies files from the local file system into a new file.
@@ -174,7 +175,6 @@ public class UploadController extends Activity {
         thread.start();
     }
 
-
     // Distribute the chunks to all availible devices.
     private void selectDevicesForFiles(ArrayList<ChunkFile> chunks, ArrayList<User> availibleDevices){
         // Link to the root of firebase.
@@ -194,8 +194,6 @@ public class UploadController extends Activity {
             if(availibleCounter > availibleDevices.size()){
                 availibleCounter = 0;
             }
-            //TODO: remove
-            availibleCounter = 0;
             String deviceID = availibleDevices.get(availibleCounter).getUserID();
             // Create a link so each device knows what file to download.
             ChunkLink link = new ChunkLink(deviceID, c.getFile().getName(), file.getFileName());
@@ -250,8 +248,6 @@ public class UploadController extends Activity {
             }
         });
     }
-
-
 
     // Opens the file picker
     private void selectFile(){

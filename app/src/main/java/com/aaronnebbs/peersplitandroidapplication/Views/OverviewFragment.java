@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
@@ -73,9 +74,8 @@ public class OverviewFragment extends Fragment {
 
                 // Chunk storage ui
                 chunksCreatedByUser.setText(""+totalChunksCreated);
-                chunksStoredByUser.setText(""+ChunkHelper.getStoredChunks().size());
-
-
+                chunksStoredByUser.setText(""+ChunkHelper.getAmountOfChunksStored());
+                Toast.makeText(getContext(), "CHUNKS: " + ChunkHelper.getAmountOfChunksStored(), Toast.LENGTH_SHORT).show();
             }
 
             @Override

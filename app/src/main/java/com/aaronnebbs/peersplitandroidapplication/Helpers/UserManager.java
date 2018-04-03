@@ -83,8 +83,6 @@ public class UserManager {
         long timeNow = ConnectivityHelper.getEpochMinute();
         long seconds = timeNow - user.getLastOnline();
         int offlineTime = 25;
-        System.out.println("Since Update: " + seconds + " seconds." );
-
         if(seconds < offlineTime){
             return true;
         }else{

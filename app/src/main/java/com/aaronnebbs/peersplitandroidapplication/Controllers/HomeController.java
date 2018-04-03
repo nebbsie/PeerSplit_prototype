@@ -1,6 +1,5 @@
 package com.aaronnebbs.peersplitandroidapplication.Controllers;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -8,17 +7,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
-import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ChunkDownloader;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
@@ -32,22 +23,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-public class HomeController extends FragmentActivity implements Serializable, GestureDetector.OnGestureListener {
+public class HomeController extends FragmentActivity implements Serializable {
     // Bottom navigation bar used on all pages.
     private BottomNavigationViewEx navBar;
     private long lastNumber;
     private boolean firstTime;
     private boolean alreadyRunning = false;
-
     // Fragments
     private Fragment selectedFragment;
     private HomeFragment homeActivity;
@@ -55,24 +40,19 @@ public class HomeController extends FragmentActivity implements Serializable, Ge
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
 
-
     // Called when the page is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
-
         firstTime = true;
-
         // If the user is not valid, go back to login page.
         if(UserManager.user == null){
             Intent i = new Intent(getApplicationContext(), LoginController.class);
             startActivity(i);
         }
-
         // Make the navigation bar look good.
         setupNavBar();
-
         // Setup a handler that every n seconds updates the database.
         if(!alreadyRunning) {
             // Update the user in the cloud.
@@ -81,11 +61,11 @@ public class HomeController extends FragmentActivity implements Serializable, Ge
             setupChunkListener();
         }
 
+        // Setup fragments
         homeActivity = new HomeFragment();
         overviewActivity = new OverviewFragment();
         profileActivity = new ProfileFragment();
         settingsActivity = new SettingsFragment();
-
         setupFragments();
     }
 
@@ -257,37 +237,6 @@ public class HomeController extends FragmentActivity implements Serializable, Ge
     protected void onDestroy() {
         System.out.println("on destroy");
         super.onDestroy();
-    }
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        System.out.println("FLING");
-        return false;
     }
 }
 

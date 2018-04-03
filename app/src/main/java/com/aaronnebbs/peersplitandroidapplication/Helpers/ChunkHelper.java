@@ -49,10 +49,13 @@ public class ChunkHelper {
         return false;
     }
 
+    // Get amount of chunks stored in the phone.
     public static int getAmountOfChunksStored(){
         getStoredChunks();
         return storedChunks.size();
     }
+
+    // Get size of all chunks stored.
     public static long getCurrentChunksStoredSize(){
         getStoredChunks();
 
@@ -63,12 +66,13 @@ public class ChunkHelper {
         return counter;
     }
 
-
+    // Add a chunk to the file.
     public static void addStoredChunk(ChunkFile fileIn){
         storedChunks.add(fileIn);
         setStoredChunks();
     }
 
+    // Clear all of the chunks of the device.
     public static void clearStoredChunks(){
         storedChunks = new ArrayList<>();
         setStoredChunks();
@@ -88,9 +92,11 @@ public class ChunkHelper {
                 }
             }
 
+
         }
         storedChunks.removeAll(chunksToDelete);
         setStoredChunks();
+        getStoredChunks();
     }
 
 }

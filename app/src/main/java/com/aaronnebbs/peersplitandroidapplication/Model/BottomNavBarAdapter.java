@@ -38,7 +38,6 @@ public class BottomNavBarAdapter extends ArrayAdapter<HomePageRow> implements Vi
         int position = (Integer) v.getTag();
         Object obj = getItem(position);
         HomePageRow model = (HomePageRow)obj;
-        System.out.println(model.getName());
     }
 
 
