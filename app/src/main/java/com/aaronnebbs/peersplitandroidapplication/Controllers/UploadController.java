@@ -14,11 +14,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
+import com.aaronnebbs.peersplitandroidapplication.Model.JobType;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
@@ -92,6 +94,8 @@ public class UploadController extends Activity {
             }
         });
 
+        System.out.println(UserManager.user.getUid());
+        JobHelper.addJob(JobType.UPLOAD_CHUNK, "this is the data", UserManager.user.getUid());
     }
 
     // Copies files from the local file system into a new file.
