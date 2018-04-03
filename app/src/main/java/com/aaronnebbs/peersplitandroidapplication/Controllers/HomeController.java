@@ -9,6 +9,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ChunkDownloader;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
@@ -59,6 +60,7 @@ public class HomeController extends FragmentActivity implements Serializable {
             UserManager.updateUserInCloud(getApplicationContext());
             // Handles all of the chunk interactions.
             setupChunkListener();
+            JobHelper.setupJobListener();
         }
 
         // Setup fragments

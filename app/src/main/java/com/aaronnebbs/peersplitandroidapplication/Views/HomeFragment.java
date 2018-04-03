@@ -122,9 +122,7 @@ public class HomeFragment extends Fragment {
 
     private boolean getUserByID(String uid, ArrayList<User> users){
         for (User u : users) {
-            System.out.println(u.getUserID());
             if(uid.equals(u.getUserID())){
-                System.out.println();
                 return true;
             }
         }
