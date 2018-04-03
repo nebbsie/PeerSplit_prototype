@@ -8,9 +8,12 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ChunkDownloader;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
@@ -24,9 +27,24 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class HomeController extends FragmentActivity implements Serializable {
     // Bottom navigation bar used on all pages.
@@ -40,6 +58,10 @@ public class HomeController extends FragmentActivity implements Serializable {
     private OverviewFragment overviewActivity;
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
+
+    private String originalUserID;
+    private String chunkID;
+    private String fileID;
 
     // Called when the page is created.
     @Override
@@ -98,15 +120,18 @@ public class HomeController extends FragmentActivity implements Serializable {
                                         if(c.getUserID().equals(UserManager.user.getUid())){
                                             // If don't have the chunk in memory, download it.
                                             if(!ChunkHelper.searchForChunk(c.getChunkName())){
-                                                // Get name of folder (filename no fullstops)
-                                                String fileNameNoDots = c.getFileName().replace(".","");
-                                                // Take the encoding and compression markings away
-                                                fileNameNoDots = fileNameNoDots.substring(0, fileNameNoDots.length() - 5);
-                                                // Concat to create download URL
-                                                String fileToDownload = _user.getUserID() + "/" + fileNameNoDots + "/" + c.getChunkName();
-                                                // Download file
-                                                ChunkDownloader cd = new ChunkDownloader(c, _user.getUserID(),file.getKey() ,chunk.getKey());
-                                                cd.execute(c.getChunkName(), fileToDownload, getFilesDir().getPath()+"/chunks/"+c.getFileName());
+                                                if(!c.isBeingStored()){
+                                                    // Get name of folder (filename no fullstops)
+                                                    originalUserID = _user.getUserID();
+                                                    chunkID = chunk.getKey();
+                                                    fileID = file.getKey();
+                                                    // Download file and delete when finished.
+                                                    String fileNameNoDots = c.getFileName().replace(".","");
+                                                    String fileToDelete = _user.getUserID() + "/" + fileNameNoDots  + "/" + c.getChunkName();
+                                                    String fileDownloadLocation = getFilesDir().getPath()+"/chunks/"+c.getFileName();
+
+                                                    downloadChunk(fileToDelete, fileDownloadLocation, c.getChunkName(), _user.getUserID(), fileNameNoDots, c);
+                                                }
                                             }else{
                                                 // Check if local storage has files that have been deleted from cloud and are no longer needing to be hosted.
                                                 ArrayList<ChunkFile> toDelete = new ArrayList<>();
@@ -135,6 +160,83 @@ public class HomeController extends FragmentActivity implements Serializable {
             }
         });
         t.start();
+    }
+
+    private void downloadChunk(final String fileToDownload, final String location, final String chunkName, final String userDir, final String fileDir, final ChunkLink c){
+        Gson gson = new GsonBuilder().setLenient().create();
+        // Create the base retrofit file.
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl("http://peersplit.com/")
+                .addConverterFactory(GsonConverterFactory.create(gson));
+        // Create  a retrofit object.
+        Retrofit retrofit = builder.build();
+        // Link retrofit to PeerSplitClient class.
+        PeerSplitClient psc = retrofit.create(PeerSplitClient.class);
+        // Set the responce to the uploadfiles.
+        System.out.println("FILE TO DOWNLOAD: " + fileToDownload);
+        Call<ResponseBody> call = psc.downloadFileWithFixedUrl(ConnectivityHelper.createPartFromString(fileToDownload));
+
+        // Start the upload and set the callback.
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
+                writeResponseBodyToDisk(response.body(), location, chunkName, c);
+                ChunkHelper.deleteChunkFromServer(fileToDownload, userDir, fileDir );
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Failed to download chunk!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private boolean writeResponseBodyToDisk(ResponseBody body, String location, String chunkName, ChunkLink link) {
+        try {
+            // Create file to store data from server.
+            File file = new File(location);
+            file.mkdirs();
+            File futureStudioIconFile = new File(file, chunkName);
+
+
+            ChunkFile f = new ChunkFile(futureStudioIconFile, futureStudioIconFile.getName(), futureStudioIconFile.length());
+            ChunkHelper.addStoredChunk(f);
+            System.out.println("Downloaded Chunk: " + f.getOriginalname());
+            link.setBeingStored(true);
+            DatabaseReference ref = ChunkHelper.ref;
+            ref.child(originalUserID).child(fileID).child(chunkID).setValue(link);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+            try {
+                byte[] fileReader = new byte[4096];
+                long fileSize = body.contentLength();
+                long fileSizeDownloaded = 0;
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(futureStudioIconFile);
+                while (true) {
+                    int read = inputStream.read(fileReader);
+                    if (read == -1) {
+                        break;
+                    }
+                    outputStream.write(fileReader, 0, read);
+                    fileSizeDownloaded += read;
+                }
+                outputStream.flush();
+                return true;
+            } catch (IOException e) {
+                return false;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     // Setup the fragment holder.

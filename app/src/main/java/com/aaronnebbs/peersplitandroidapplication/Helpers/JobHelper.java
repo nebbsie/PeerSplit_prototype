@@ -30,7 +30,7 @@ public class JobHelper {
                             Job j = job.getValue(Job.class);
                             // Do upload value
                             if(j.getJob() == JobType.UPLOAD_CHUNK){
-                                System.out.println("UPLOAD CHUNK JOB: " + j.getData());
+                                doJob(j, job.getKey());
                             }
                         }
                     }
@@ -42,6 +42,16 @@ public class JobHelper {
             }
         });
         t.start();
+    }
+
+    private static void doJob(Job job, String jobID){
+        jobReference.child(UserManager.user.getUid()).child(jobID).removeValue();
+        System.out.println("Doing job: " + job.getJob());
+
+        if (job.getJob() == JobType.UPLOAD_CHUNK) {
+
+        }
+
     }
 
 }

@@ -2,14 +2,33 @@ package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.View;
+import android.widget.Toast;
+
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ChunkHelper {
 
@@ -47,6 +66,21 @@ public class ChunkHelper {
             }
         }
         return false;
+    }
+
+    public static void deleteChunkFromServer(final String str, final String userDir, final String fileDir){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String urlString = "http://peersplit.com/api/delete.php?location="+str+"&userDir="+userDir+"&fileDir="+fileDir;
+                    URL getIP = new URL(urlString);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(getIP.openStream()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     // Get amount of chunks stored in the phone.
