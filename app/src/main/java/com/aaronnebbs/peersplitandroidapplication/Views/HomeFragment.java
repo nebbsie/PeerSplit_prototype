@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
@@ -19,6 +20,7 @@ import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
 import com.aaronnebbs.peersplitandroidapplication.Model.JobType;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
+import com.aaronnebbs.peersplitandroidapplication.Model.PrivateKeyPair;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
 import com.google.firebase.database.DataSnapshot;
@@ -45,17 +47,20 @@ public class HomeFragment extends Fragment {
         adapter = new BottomNavBarAdapter(dataModels, getContext());
         listView.setAdapter(adapter);
 
+        // Retrieve all of the files that the user has uploaded to the cloud.
         getAllFilesBeingStored();
 
+        // On lick listener for the files on the home page.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 HomePageRow dataModel= dataModels.get(position);
-                getChunkData(dataModel);
+                downloadFile(dataModel);
             }
         });
     }
 
+    // Sets a job in Firebase to tell device to upload chunk.
     private void setJobList(ArrayList<ChunkLink> chunkLinks){
         System.out.println("Attempting to download " + chunkLinks.size() + " chunks.");
         for (ChunkLink link : chunkLinks) {
@@ -64,24 +69,19 @@ public class HomeFragment extends Fragment {
         }
     }
 
-
     // Gets a list of available devices to get the chunks from.
-    private void getChunkData(final HomePageRow fileToCheck){
+    private void downloadFile(final HomePageRow fileToCheck){
         // Get information about users.
         final ArrayList<ChunkLink> availableToDownloadFrom = new ArrayList<>();
         final ArrayList<ChunkLink> finalDevicesToDownloadFrom = new ArrayList<>();
 
-        // Get every chunk link for the correct file.
+        // Get all users that have a chunk for the file stored on their device.
         ChunkHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Each user
                 for (DataSnapshot user : dataSnapshot.getChildren()) {
-                    // Each file for each user
                     for (DataSnapshot file : user.getChildren()) {
-                        // Check if correct file
                         if(file.getKey().equals(fileToCheck.getUid())) {
-                            // Each chunk for the file.
                             for (DataSnapshot chunk : file.getChildren()) {
                                 ChunkLink link = chunk.getValue(ChunkLink.class);
                                 if (link.isBeingStored()) {
@@ -91,7 +91,7 @@ public class HomeFragment extends Fragment {
                         }
                     }
                 }
-                // Get all users
+                // Get all of the users and only add them if they are online.
                 final ArrayList<User> users = new ArrayList<>();
                 UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -105,6 +105,7 @@ public class HomeFragment extends Fragment {
                                 users.add(u);
                             }
                         }
+                        // Only select chunks if the user is online and the chunk has not been added already.
                         // Check for multiple chunks.
                         for (ChunkLink chunk : availableToDownloadFrom) {
                             // Check if the chunk has already been added.
@@ -115,6 +116,7 @@ public class HomeFragment extends Fragment {
                                 }
                             }
                         }
+                        // Tell the selected devices to upload the chunks so they can be downloaded.
                         setJobList(finalDevicesToDownloadFrom);
                     }
                     @Override
@@ -130,6 +132,7 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    // Searches for a user by UID in a list.
     private boolean getUserByID(String uid, ArrayList<User> users){
         for (User u : users) {
             if(uid.equals(u.getUserID())){
@@ -139,6 +142,7 @@ public class HomeFragment extends Fragment {
         return false;
     }
 
+    // Check if the list already contains the same chunk.
     private boolean checkDevices(String str, ArrayList<ChunkLink> arr){
         for(ChunkLink l : arr){
             if (l.getChunkName().equals(str)){
@@ -148,6 +152,7 @@ public class HomeFragment extends Fragment {
         return false;
     }
 
+    // Get all files that are being stored on the network by the user and update the ui.
     private void getAllFilesBeingStored(){
         FileHelper.ref.addValueEventListener(new ValueEventListener() {
             @Override
@@ -157,18 +162,15 @@ public class HomeFragment extends Fragment {
                 for (DataSnapshot file : dataSnapshot.getChildren()){
                     PSFile f = file.getValue(PSFile.class);
                     if(f.getOwnerID().equals(UserManager.user.getUid())){
-
                         dataModels.add(new HomePageRow(f.getFileName(), FileHelper.getFileSizeString(f.getTotalSize()), file.getKey()));
-
                     }
                 }
                 adapter.notifyDataSetChanged();
+                // Remove unused keys
+                CryptoHelper.removeUnusedKeys(dataModels);
             }
-
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError){}
         });
     }
 

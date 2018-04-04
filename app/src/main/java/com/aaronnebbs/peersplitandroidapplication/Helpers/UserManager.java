@@ -59,14 +59,12 @@ public class UserManager {
         wakeLock.acquire();
 
         final Handler handler = new Handler();
-        final int delay = 5000; //milliseconds
-
+        final int delay = 2500; //milliseconds
         handler.postDelayed(new Runnable(){
             public void run(){
-                System.out.println("Updated Firebase: " + UserManager.user.getUid() + "  " + UserManager.userAccount.getUsername());
                 // Reload the data used for an update.
                 SettingsHelper.setup();
-                // Check if the user can upload chu
+                // Check if the user can upload chunk
                 ConnectivityHelper.update(context);
                 UserManager.updateUser();
                 handler.postDelayed(this, delay);
@@ -82,7 +80,7 @@ public class UserManager {
     public static boolean getIfOnline(User user){
         long timeNow = ConnectivityHelper.getEpochMinute();
         long seconds = timeNow - user.getLastOnline();
-        int offlineTime = 25;
+        int offlineTime = 10;
         if(seconds < offlineTime){
             return true;
         }else{

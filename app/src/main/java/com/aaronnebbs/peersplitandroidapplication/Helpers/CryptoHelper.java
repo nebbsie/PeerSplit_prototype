@@ -1,6 +1,8 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
 import android.content.SharedPreferences;
+
+import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
 import com.aaronnebbs.peersplitandroidapplication.Model.PrivateKeyPair;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -22,14 +24,41 @@ public class CryptoHelper {
         System.out.println("Found: " + keys.size() + " keys.");
     }
 
-    private static void getSavedKeys(){
+    public static ArrayList<PrivateKeyPair> getSavedKeys(){
         String keys_out = prefs.getString(SAVEDKEYS, "NULL");
         if(keys_out.equals("NULL")){
             keys = new ArrayList<>();
         }else{
             keys = new Gson().fromJson(keys_out, type);
         }
+        return keys;
+    }
 
+    public static void removeKey(String name){
+        PrivateKeyPair toDelete = new PrivateKeyPair("NULL", new byte[16]);
+        for(PrivateKeyPair p : keys){
+            if(p.getName().equals(name)){
+                toDelete = p;
+            }
+        }
+        if (!toDelete.getName().equals("NULL")) {
+            keys.remove(toDelete);
+        }
+        setSavedkeys();
+    }
+
+    public static void removeUnusedKeys(ArrayList<HomePageRow> dataModels) {
+        for (PrivateKeyPair key : CryptoHelper.getSavedKeys()) {
+            boolean toDelete = true;
+            for (HomePageRow file : dataModels) {
+                if (key.getName().equals(file.getName())) {
+                    toDelete = false;
+                }
+            }
+            if (toDelete) {
+                removeKey(key.getName());
+            }
+        }
     }
 
     private static void setSavedkeys(){

@@ -209,38 +209,17 @@ public class UploadController extends Activity {
     }
 
     // Uploads multiple chunks to the server.
-    private void uploadChunks(final ArrayList<ChunkFile> chunks){
-
+    private Call<ResponseBody> uploadChunks(final ArrayList<ChunkFile> chunks){
         // Generate the retrofit boilerplate.
         PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
-
         // Add each of the files to the params.
         List<MultipartBody.Part> partList = new ArrayList<>();
         for(ChunkFile f : chunks){
             partList.add(ConnectivityHelper.prepareFilePart(f.getFile().getName(), f.getFile()));
         }
-
         // Set the responce to the uploadfiles.
         Call<ResponseBody> call = psc.uploadMultipleFilesDynamic(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),partList);
-
-        // Start the upload and set the callback.
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Toast.makeText(getApplicationContext(), "Uploaded files!", Toast.LENGTH_SHORT).show();
-                // Selects what devices will recieve the chunks.
-                selectDevicesForFiles(chunks, availibleUsers);
-                uploadMode();
-                fileStatus.setText("UPLOADED FILE");
-                uploadingChart.setPercentage(100);
-                uploadingChart.setInnerText("100%");
-                uploadButton.setVisibility(View.INVISIBLE);
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Failed to upload files!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        return call;
     }
 
     // Opens the file picker
@@ -268,7 +247,24 @@ public class UploadController extends Activity {
         // Upload the chunks to the server.
         loadingMode();
         fileStatus.setText("UPLOADING FILE");
-        uploadChunks(chunks);
+        // Start the upload and set the callback.
+        uploadChunks(chunks).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Toast.makeText(getApplicationContext(), "Uploaded files!", Toast.LENGTH_SHORT).show();
+                // Selects what devices will recieve the chunks.
+                selectDevicesForFiles(chunks, availibleUsers);
+                uploadMode();
+                fileStatus.setText("UPLOADED FILE");
+                uploadingChart.setPercentage(100);
+                uploadingChart.setInnerText("100%");
+                uploadButton.setVisibility(View.INVISIBLE);
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Failed to upload files!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // Sets the file upload parts to visible and hides the select file button to invisible.
