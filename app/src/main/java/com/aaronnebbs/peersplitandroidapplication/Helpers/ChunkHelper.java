@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -141,6 +142,35 @@ public class ChunkHelper {
         storedChunks.removeAll(chunksToDelete);
         setStoredChunks();
         getStoredChunks();
+    }
+
+    // Uploads multiple chunks to the server.
+    public static Call<ResponseBody> uploadChunks(final ArrayList<ChunkFile> chunks){
+        // Generate the retrofit boilerplate.
+        PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
+        // Add each of the files to the params.
+        List<MultipartBody.Part> partList = new ArrayList<>();
+        for(ChunkFile f : chunks){
+            partList.add(ConnectivityHelper.prepareFilePart(f.getFile().getName(), f.getFile()));
+        }
+        // Set the response to the upload files.
+        return psc.uploadMultipleFilesDynamic(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),partList);
+    }
+
+    // Uploads multiple chunks to the server.
+    public static Call<ResponseBody> uploadChunk(final ChunkFile chunk){
+        // Generate the retrofit boilerplate.
+        PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
+        // Set the response to the upload file.
+       return psc.uploadFile(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),ConnectivityHelper.prepareFilePart(chunk.getFile().getName(), chunk.getFile()));
+    }
+
+    public static Call<ResponseBody>  downloadChunk(final String fileToDownload){
+        PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
+        // Set the responce to the uploadfiles.
+        return psc.downloadFileWithFixedUrl(ConnectivityHelper.createPartFromString(fileToDownload));
+
+
     }
 
 }

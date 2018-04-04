@@ -9,16 +9,26 @@ public class ChunkLink {
     private String chunkName;
     private String fileName;
     private boolean beingStored;
+    private String fileID;
 
     public ChunkLink(){
 
     }
 
-    public ChunkLink(String userID, String chunkName, String fileName) {
+    public ChunkLink(String userID, String chunkName, String fileName, String fileID) {
         this.userID = userID;
         this.chunkName = chunkName;
         this.fileName = fileName;
         this.beingStored = false;
+        this.fileID = fileID;
+    }
+
+    public String getFileID() {
+        return fileID;
+    }
+
+    public void setFileID(String fileID) {
+        this.fileID = fileID;
     }
 
     public boolean isBeingStored() {

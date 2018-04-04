@@ -14,6 +14,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.RetrofitBuilderGenerator;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
@@ -103,19 +104,20 @@ public class HomeController extends FragmentActivity implements Serializable {
                 ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        //TODO: Put this as a job.
                         // Used to see if files are on device that don't need to be.
                         ArrayList<ChunkFile> filesOnBoard = ChunkHelper.getStoredChunks();
                         // Each user
-                        for(DataSnapshot user : dataSnapshot.getChildren()){
-                            User _user = user.getValue(User.class);
+                        for(final DataSnapshot user : dataSnapshot.getChildren()){
+                            final User _user = user.getValue(User.class);
                             _user.setUserID(user.getKey());
                             // Don't download own chunks.
                             if(!_user.getUserID().equals(UserManager.user.getUid())){
                                 // Each file for user
-                                for(DataSnapshot file : user.getChildren()){
+                                for(final DataSnapshot file : user.getChildren()){
                                     // Each chunk for each file
                                     for(DataSnapshot chunk : file.getChildren()){
-                                        ChunkLink c = chunk.getValue(ChunkLink.class);
+                                        final ChunkLink c = chunk.getValue(ChunkLink.class);
                                         // Check if the chunk is for the current user.
                                         if(c.getUserID().equals(UserManager.user.getUid())){
                                             // If don't have the chunk in memory, download it.
@@ -126,10 +128,25 @@ public class HomeController extends FragmentActivity implements Serializable {
                                                     chunkID = chunk.getKey();
                                                     fileID = file.getKey();
                                                     // Download file and delete when finished.
-                                                    String fileNameNoDots = c.getFileName().replace(".","");
-                                                    String fileToDelete = _user.getUserID() + "/" + fileNameNoDots  + "/" + c.getChunkName();
-                                                    String fileDownloadLocation = getFilesDir().getPath()+"/chunks/"+c.getFileName();
-                                                    downloadChunk(fileToDelete, fileDownloadLocation, c.getChunkName(), _user.getUserID(), fileNameNoDots, c);
+                                                    final String fileNameNoDots = c.getFileName().replace(".","");
+                                                    final String fileToDelete = _user.getUserID() + "/" + fileNameNoDots  + "/" + c.getChunkName();
+                                                    final String fileDownloadLocation = getFilesDir().getPath()+"/chunks/"+c.getFileName();
+
+                                                    // Start the upload and set the callback.
+                                                    Call<ResponseBody> call = ChunkHelper.downloadChunk(fileToDelete);
+                                                    call.enqueue(new Callback<ResponseBody>() {
+                                                        @Override
+                                                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                            Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
+                                                            writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c);
+                                                            ChunkHelper.deleteChunkFromServer(fileToDelete, _user.getUserID(), fileNameNoDots );
+                                                        }
+                                                        @Override
+                                                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                            Toast.makeText(getApplicationContext(), "Failed to download chunk!", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+
                                                 }
                                             }else{
                                                 // Check if local storage has files that have been deleted from cloud and are no longer needing to be hosted.
@@ -161,34 +178,7 @@ public class HomeController extends FragmentActivity implements Serializable {
         t.start();
     }
 
-    private void downloadChunk(final String fileToDownload, final String location, final String chunkName, final String userDir, final String fileDir, final ChunkLink c){
-        Gson gson = new GsonBuilder().setLenient().create();
-        // Create the base retrofit file.
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://peersplit.com/")
-                .addConverterFactory(GsonConverterFactory.create(gson));
-        // Create  a retrofit object.
-        Retrofit retrofit = builder.build();
-        // Link retrofit to PeerSplitClient class.
-        PeerSplitClient psc = retrofit.create(PeerSplitClient.class);
-        // Set the responce to the uploadfiles.
-        System.out.println("FILE TO DOWNLOAD: " + fileToDownload);
-        Call<ResponseBody> call = psc.downloadFileWithFixedUrl(ConnectivityHelper.createPartFromString(fileToDownload));
 
-        // Start the upload and set the callback.
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
-                writeResponseBodyToDisk(response.body(), location, chunkName, c);
-                ChunkHelper.deleteChunkFromServer(fileToDownload, userDir, fileDir );
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Failed to download chunk!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private boolean writeResponseBodyToDisk(ResponseBody body, String location, String chunkName, ChunkLink link) {
         try {

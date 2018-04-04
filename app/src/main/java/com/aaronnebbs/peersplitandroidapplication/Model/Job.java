@@ -4,12 +4,32 @@ public class Job {
 
     private JobType job;
     private String data;
+    private String senderID;
+    private String fileID;
 
     public Job(){}
 
-    public Job(JobType job, String data){
+    public Job(JobType job, String data, String senderID, String fileID){
         this.job = job;
         this.data = data;
+        this.senderID = senderID;
+        this.fileID = fileID;
+    }
+
+    public String getFileID() {
+        return fileID;
+    }
+
+    public void setFileID(String fileID) {
+        this.fileID = fileID;
+    }
+
+    public String getSenderID() {
+        return senderID;
+    }
+
+    public void setSenderID(String senderID) {
+        this.senderID = senderID;
     }
 
     public JobType getJob() {

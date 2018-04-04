@@ -17,6 +17,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
+import com.aaronnebbs.peersplitandroidapplication.Model.Confirm;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
 import com.aaronnebbs.peersplitandroidapplication.Model.JobType;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
@@ -38,6 +39,7 @@ public class HomeFragment extends Fragment {
     private ArrayList<HomePageRow> dataModels;
     private ListView listView;
     private static BottomNavBarAdapter adapter;
+    private boolean downloadCheck;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -61,12 +63,49 @@ public class HomeFragment extends Fragment {
     }
 
     // Sets a job in Firebase to tell device to upload chunk.
-    private void setJobList(ArrayList<ChunkLink> chunkLinks){
+    private void setJobList(final ArrayList<ChunkLink> chunkLinks){
         System.out.println("Attempting to download " + chunkLinks.size() + " chunks.");
         for (ChunkLink link : chunkLinks) {
-            System.out.println("Setting job for : " + link.getUserID());
-            JobHelper.addJob(JobType.UPLOAD_CHUNK, link.getChunkName(), link.getUserID());
+            JobHelper.addJob(JobType.UPLOAD_CHUNK, link.getChunkName(), link.getUserID(), link.getFileID());
         }
+
+        downloadCheck = false;
+
+        final ArrayList<String> chunksGot = new ArrayList<>();
+
+        JobHelper.confirmReference.child(UserManager.user.getUid()).child(chunkLinks.get(0).getFileID()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                // Check if already downloaded the files
+                if (downloadCheck == false) {
+                    for (DataSnapshot d : dataSnapshot.getChildren()) {
+                        // Get confirmation for each chunk.
+                        Confirm c = d.getValue(Confirm.class);
+                        // Check if the chunk is not already added.
+                        if (!chunksGot.contains(c.getChunkName())){
+                            // Add to the download list.
+                            chunksGot.add(c.getChunkName());
+                            System.out.println("Got Chunk: " + c.getChunkName());
+                            // Delete the confirmation message.
+                            JobHelper.confirmReference.child(UserManager.user.getUid()).child(chunkLinks.get(0).getFileID()).child(d.getKey()).removeValue();
+                            // Download the chunk.
+
+                        }
+                    }
+
+                    if (chunksGot.size() == chunkLinks.size()) {
+                        downloadCheck = true;
+                        System.out.println("GOT ALL CHUNKS");
+                        JobHelper.confirmReference.removeEventListener(this);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
     }
 
     // Gets a list of available devices to get the chunks from.

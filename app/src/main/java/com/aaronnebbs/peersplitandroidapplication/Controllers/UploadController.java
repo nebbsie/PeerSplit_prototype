@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
@@ -94,9 +96,6 @@ public class UploadController extends Activity {
                 startActivity(i);
             }
         });
-
-        System.out.println(UserManager.user.getUid());
-        JobHelper.addJob(JobType.UPLOAD_CHUNK, "this is the data", UserManager.user.getUid());
     }
 
     // Copies files from the local file system into a new file.
@@ -201,25 +200,11 @@ public class UploadController extends Activity {
             }
             String deviceID = availibleDevices.get(availibleCounter).getUserID();
             // Create a link so each device knows what file to download.
-            ChunkLink link = new ChunkLink(deviceID, c.getFile().getName(), file.getFileName());
+            ChunkLink link = new ChunkLink(deviceID, c.getFile().getName(), file.getFileName(), fileID);
             // Put the link on firebase
             ref.child("chunks").child(UserManager.user.getUid()).child(fileID).push().setValue(link);
             availibleCounter +=1;
         }
-    }
-
-    // Uploads multiple chunks to the server.
-    private Call<ResponseBody> uploadChunks(final ArrayList<ChunkFile> chunks){
-        // Generate the retrofit boilerplate.
-        PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
-        // Add each of the files to the params.
-        List<MultipartBody.Part> partList = new ArrayList<>();
-        for(ChunkFile f : chunks){
-            partList.add(ConnectivityHelper.prepareFilePart(f.getFile().getName(), f.getFile()));
-        }
-        // Set the responce to the uploadfiles.
-        Call<ResponseBody> call = psc.uploadMultipleFilesDynamic(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),partList);
-        return call;
     }
 
     // Opens the file picker
@@ -248,7 +233,7 @@ public class UploadController extends Activity {
         loadingMode();
         fileStatus.setText("UPLOADING FILE");
         // Start the upload and set the callback.
-        uploadChunks(chunks).enqueue(new Callback<ResponseBody>() {
+        ChunkHelper.uploadChunks(chunks).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Toast.makeText(getApplicationContext(), "Uploaded files!", Toast.LENGTH_SHORT).show();

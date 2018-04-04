@@ -19,6 +19,13 @@ public interface PeerSplitClient {
     );
 
     @Multipart
+    @POST("/api/upload.php")
+    Call<ResponseBody> uploadFile(
+            @Part("uid") RequestBody  uid,
+            @Part MultipartBody.Part files
+    );
+
+    @Multipart
     @POST("/api/download.php")
     Call<ResponseBody> downloadFileWithFixedUrl(
             @Part("fileToDownload") RequestBody fileToDownload
