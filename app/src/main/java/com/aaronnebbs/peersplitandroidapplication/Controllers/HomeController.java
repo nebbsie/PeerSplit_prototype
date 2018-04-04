@@ -129,7 +129,6 @@ public class HomeController extends FragmentActivity implements Serializable {
                                                     String fileNameNoDots = c.getFileName().replace(".","");
                                                     String fileToDelete = _user.getUserID() + "/" + fileNameNoDots  + "/" + c.getChunkName();
                                                     String fileDownloadLocation = getFilesDir().getPath()+"/chunks/"+c.getFileName();
-
                                                     downloadChunk(fileToDelete, fileDownloadLocation, c.getChunkName(), _user.getUserID(), fileNameNoDots, c);
                                                 }
                                             }else{

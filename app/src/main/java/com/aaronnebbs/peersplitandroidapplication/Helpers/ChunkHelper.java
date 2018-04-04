@@ -68,6 +68,18 @@ public class ChunkHelper {
         return false;
     }
 
+    // Searches the chunks that are currently stored to check if it contains another.
+    public static ChunkFile getChunk(String name){
+        getStoredChunks();
+        for(ChunkFile f : storedChunks){
+            if(name.equals(f.getOriginalname())){
+                return f;
+            }
+        }
+        return null;
+    }
+
+    // Deletes a chunk from the php cache server.
     public static void deleteChunkFromServer(final String str, final String userDir, final String fileDir){
         new Thread(new Runnable() {
             @Override
@@ -125,8 +137,6 @@ public class ChunkHelper {
                     f.getParentFile().delete();
                 }
             }
-
-
         }
         storedChunks.removeAll(chunksToDelete);
         setStoredChunks();

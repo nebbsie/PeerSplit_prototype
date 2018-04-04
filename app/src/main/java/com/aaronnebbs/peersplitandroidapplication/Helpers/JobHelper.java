@@ -1,5 +1,8 @@
 package com.aaronnebbs.peersplitandroidapplication.Helpers;
 
+import android.widget.Toast;
+
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.Job;
 import com.aaronnebbs.peersplitandroidapplication.Model.JobType;
 import com.google.firebase.database.DataSnapshot;
@@ -44,14 +47,23 @@ public class JobHelper {
         t.start();
     }
 
+    // Takes in a job and performs the action.
     private static void doJob(Job job, String jobID){
-        jobReference.child(UserManager.user.getUid()).child(jobID).removeValue();
-        System.out.println("Doing job: " + job.getJob());
-
+        System.out.println("Doing job: " + job.getJob() + " " + job.getData());
+        // Do the upload job.
         if (job.getJob() == JobType.UPLOAD_CHUNK) {
-
+            // Get the chunk from memory.
+            ChunkFile f = ChunkHelper.getChunk(job.getData());
+            // If the chunk is valid, attempt to upload.
+            if(f!=null){
+                System.out.println("Found chunk: " + f.getOriginalname() + "  Sizeof: " + FileHelper.getFileSizeString(f.getFile()));
+                //TODO: Upload the chunk.
+            }else{
+                System.out.println("No chunk found");
+            }
         }
-
+        // Remove the job from  firebase.
+        jobReference.child(UserManager.user.getUid()).child(jobID).removeValue();
     }
 
 }

@@ -17,6 +17,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.RetrofitBuilderGenerator;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
@@ -207,20 +208,11 @@ public class UploadController extends Activity {
         }
     }
 
-    // Uploads the chunks to the server.
+    // Uploads multiple chunks to the server.
     private void uploadChunks(final ArrayList<ChunkFile> chunks){
-        Gson gson = new GsonBuilder().setLenient().create();
 
-        // Create the base retrofit file.
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://peersplit.com/")
-                .addConverterFactory(GsonConverterFactory.create(gson));
-
-        // Create  a retrofit object.
-        Retrofit retrofit = builder.build();
-
-        // Link retrofit to PeerSplitClient class.
-        PeerSplitClient psc = retrofit.create(PeerSplitClient.class);
+        // Generate the retrofit boilerplate.
+        PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
 
         // Add each of the files to the params.
         List<MultipartBody.Part> partList = new ArrayList<>();
@@ -230,7 +222,6 @@ public class UploadController extends Activity {
 
         // Set the responce to the uploadfiles.
         Call<ResponseBody> call = psc.uploadMultipleFilesDynamic(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),partList);
-
 
         // Start the upload and set the callback.
         call.enqueue(new Callback<ResponseBody>() {
@@ -245,7 +236,6 @@ public class UploadController extends Activity {
                 uploadingChart.setInnerText("100%");
                 uploadButton.setVisibility(View.INVISIBLE);
             }
-
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Failed to upload files!", Toast.LENGTH_SHORT).show();

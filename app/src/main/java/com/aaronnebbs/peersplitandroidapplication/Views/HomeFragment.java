@@ -12,10 +12,12 @@ import android.widget.ListView;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
+import com.aaronnebbs.peersplitandroidapplication.Model.JobType;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
@@ -54,14 +56,22 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void attemptDownload(ArrayList<ChunkLink> chunkLinks){
+    private void setJobList(ArrayList<ChunkLink> chunkLinks){
         System.out.println("Attempting to download " + chunkLinks.size() + " chunks.");
+        for (ChunkLink link : chunkLinks) {
+            System.out.println("Setting job for : " + link.getUserID());
+            JobHelper.addJob(JobType.UPLOAD_CHUNK, link.getChunkName(), link.getUserID());
+        }
     }
 
+
+    // Gets a list of available devices to get the chunks from.
     private void getChunkData(final HomePageRow fileToCheck){
         // Get information about users.
         final ArrayList<ChunkLink> availableToDownloadFrom = new ArrayList<>();
-        final ArrayList<ChunkLink> finalDevices = new ArrayList<>();
+        final ArrayList<ChunkLink> finalDevicesToDownloadFrom = new ArrayList<>();
+
+        // Get every chunk link for the correct file.
         ChunkHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -98,14 +108,14 @@ public class HomeFragment extends Fragment {
                         // Check for multiple chunks.
                         for (ChunkLink chunk : availableToDownloadFrom) {
                             // Check if the chunk has already been added.
-                            if(!checkDevices(chunk.getChunkName(), finalDevices)){
+                            if(!checkDevices(chunk.getChunkName(), finalDevicesToDownloadFrom)){
                                 // Check if the user is available.
                                 if(getUserByID(chunk.getUserID(), users)){
-                                    finalDevices.add(chunk);
+                                    finalDevicesToDownloadFrom.add(chunk);
                                 }
                             }
                         }
-                        attemptDownload(finalDevices);
+                        setJobList(finalDevicesToDownloadFrom);
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
