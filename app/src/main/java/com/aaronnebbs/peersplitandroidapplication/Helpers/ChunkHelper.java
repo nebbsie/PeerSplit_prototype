@@ -168,12 +168,52 @@ public class ChunkHelper {
        return psc.uploadFile(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),ConnectivityHelper.prepareFilePart(chunk.getFile().getName(), chunk.getFile()));
     }
 
-    public static Call<ResponseBody>  downloadChunk(final String fileToDownload){
+    // Downloads a single chunk.
+    public static Call<ResponseBody> downloadChunk(final String fileToDownload){
         PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
         // Set the responce to the uploadfiles.
         return psc.downloadFileWithFixedUrl(ConnectivityHelper.createPartFromString(fileToDownload));
     }
 
+    // Saves a chunk when rebuilding a file.
+    public static File saveChunkTemp(ResponseBody body, String location, String chunkName) {
+        try {
+            // Create file to store data from server.
+            File file = new File(location);
+            file.mkdirs();
+            File futureStudioIconFile = new File(file, chunkName);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+            try {
+                byte[] fileReader = new byte[4096];
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(futureStudioIconFile);
+                while (true) {
+                    int read = inputStream.read(fileReader);
+                    if (read == -1) {
+                        break;
+                    }
+                    outputStream.write(fileReader, 0, read);
+                }
+                outputStream.flush();
+                return futureStudioIconFile;
+            } catch (IOException e) {
+                return null;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    // Saves a chunk and then updates firebase to say that it has been downloaded.
     public static boolean writeResponseBodyToDisk(ResponseBody body, String location, String chunkName, ChunkLink link, String originalUserID, String fileID, String chunkID) {
         try {
             // Create file to store data from server.

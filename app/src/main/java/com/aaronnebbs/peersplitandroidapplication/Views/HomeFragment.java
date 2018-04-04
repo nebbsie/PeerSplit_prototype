@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
@@ -16,6 +17,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
+import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
 import com.aaronnebbs.peersplitandroidapplication.Model.Confirm;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
@@ -29,10 +31,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Timer;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
 
@@ -65,14 +73,17 @@ public class HomeFragment extends Fragment {
     // Sets a job in Firebase to tell device to upload chunk.
     private void setJobList(final ArrayList<ChunkLink> chunkLinks){
         System.out.println("Attempting to download " + chunkLinks.size() + " chunks.");
+
+        // Send jobs to each device to upload the chunks.
         for (ChunkLink link : chunkLinks) {
             JobHelper.addJob(JobType.UPLOAD_CHUNK, link.getChunkName(), link.getUserID(), link.getFileID());
         }
 
         downloadCheck = false;
 
+        // Wait for the chunks to be uploaded and then download them.
         final ArrayList<String> chunksGot = new ArrayList<>();
-
+        final ArrayList<ChunkFile> downloadedChunks = new ArrayList<>();
         JobHelper.confirmReference.child(UserManager.user.getUid()).child(chunkLinks.get(0).getFileID()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -81,19 +92,38 @@ public class HomeFragment extends Fragment {
                 if (downloadCheck == false) {
                     for (DataSnapshot d : dataSnapshot.getChildren()) {
                         // Get confirmation for each chunk.
-                        Confirm c = d.getValue(Confirm.class);
+                        final Confirm c = d.getValue(Confirm.class);
                         // Check if the chunk is not already added.
                         if (!chunksGot.contains(c.getChunkName())){
                             // Add to the download list.
                             chunksGot.add(c.getChunkName());
-                            System.out.println("Got Chunk: " + c.getChunkName());
                             // Delete the confirmation message.
                             JobHelper.confirmReference.child(UserManager.user.getUid()).child(chunkLinks.get(0).getFileID()).child(d.getKey()).removeValue();
-                            // Download the chunk.
 
+                            String subString = c.getChunkName().substring(0, c.getChunkName().length() - 10);
+                            final String folderString = subString.replace(".","");
+                            String fileDownloadLocation = c.getSenderID() + "/" + folderString + "/" + c.getChunkName();
+
+                            // Attempt to download chunks.
+                            ChunkHelper.downloadChunk(fileDownloadLocation).enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    System.out.println("Successfully Downloaded Temp: " + c.getChunkName());
+                                    File out = ChunkHelper.saveChunkTemp(response.body(), getContext().getFilesDir()+"/temp/"+ folderString ,c.getChunkName());
+                                    downloadedChunks.add(new ChunkFile(out, out.getName(), out.length()));
+                                    if (downloadedChunks.size() == chunkLinks.size()) {
+                                        // Put back together!
+                                        putFileBackTogether(downloadedChunks);
+                                    }
+                                }
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    Toast.makeText(getContext(), "Failed to get file! Try again!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
-
+                    // Check if all confirmations have been checked, if they have stop listening.
                     if (chunksGot.size() == chunkLinks.size()) {
                         downloadCheck = true;
                         System.out.println("GOT ALL CHUNKS");
@@ -106,6 +136,22 @@ public class HomeFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {}
         });
 
+    }
+
+    private void putFileBackTogether(ArrayList<ChunkFile> chunks){
+        if (chunks.size() > 0) {
+            try {
+                File mergedFile = FileHelper.merge(chunks.get(0).getFile());
+                String originalName = chunks.get(0).getOriginalname();
+                String keyName = originalName.substring(0, originalName.length()-10);
+                byte[] decryptKey = CryptoHelper.getKey(keyName);
+                File decryptedFile = FileHelper.decrypt(decryptKey, mergedFile, mergedFile, true);
+                File normalFile = FileHelper.decompress(decryptedFile, decryptedFile, true);
+                System.out.println("File Downloaded: "  + normalFile.length() + " bytes");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // Gets a list of available devices to get the chunks from.

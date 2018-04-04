@@ -65,7 +65,7 @@ public class JobHelper {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         System.out.println("Uploaded Chunk: " + f.getOriginalname() + "  Sizeof: " + FileHelper.getFileSizeString(f.getFile()));
-                        confirmReference.child(job.getSenderID()).child(job.getFileID()).push().setValue(new Confirm(f.getOriginalname()));
+                        confirmReference.child(job.getSenderID()).child(job.getFileID()).push().setValue(new Confirm(f.getOriginalname(), UserManager.user.getUid()));
                         jobReference.child(UserManager.user.getUid()).child(jobID).removeValue();
                     }
                     @Override

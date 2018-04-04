@@ -113,9 +113,11 @@ public class FileHelper {
             return null;
         }
         // Create the file name based on the first chunks information.
-        String path = files.get(0).getParentFile().getParentFile()+"/mergeOutput/";
+        String path = files.get(0).getParentFile()+"/mergeOutput/";
+        File loc = new File(path);
+        loc.mkdirs();
         String outputFileName = strings[0] + "." + strings[1];
-        File outputFile = new File( path + outputFileName);
+        File outputFile = new File( path + outputFileName+".gzenc");
         int sizeOfMerge = 0;
 
         try {
