@@ -142,7 +142,12 @@ public class FileHelper {
     // Returns the size of each chunk to be used for splitting.
     private static int getSizeOfChunk(long size, int devices){
         //TODO: set device number to a number of phones availible.
-        System.out.println("Devices Online: " + devices);
+        System.out.println("Devices Online: " + devices + " Size: " + size);
+
+        if (size < 100000) {
+            return roundUpToNearestPowerOfTwo(size/1024);
+        }
+
         long autoSize = (size / devices)/1024;
         int autoSizeRounded = roundUpToNearestPowerOfTwo(autoSize);
         return autoSizeRounded;

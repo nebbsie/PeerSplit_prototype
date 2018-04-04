@@ -43,11 +43,15 @@ public class CryptoHelper {
         }
         if (!toDelete.getName().equals("NULL")) {
             keys.remove(toDelete);
+            System.out.println("Removed Key: " + toDelete.getName());
         }
         setSavedkeys();
     }
 
     public static void removeUnusedKeys(ArrayList<HomePageRow> dataModels) {
+
+        ArrayList<String> keysToDel = new ArrayList<>();
+
         for (PrivateKeyPair key : CryptoHelper.getSavedKeys()) {
             boolean toDelete = true;
             for (HomePageRow file : dataModels) {
@@ -56,9 +60,15 @@ public class CryptoHelper {
                 }
             }
             if (toDelete) {
-                removeKey(key.getName());
+                keysToDel.add(key.getName());
             }
         }
+
+        for (String str : keysToDel) {
+            removeKey(str);
+        }
+
+        // Do deltetion
     }
 
     private static void setSavedkeys(){

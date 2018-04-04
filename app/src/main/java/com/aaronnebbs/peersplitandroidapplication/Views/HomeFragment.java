@@ -79,6 +79,8 @@ public class HomeFragment extends Fragment {
             JobHelper.addJob(JobType.UPLOAD_CHUNK, link.getChunkName(), link.getUserID(), link.getFileID());
         }
 
+        System.out.println("Looking for: " + chunkLinks.size() + " chunks!");
+
         downloadCheck = false;
 
         // Wait for the chunks to be uploaded and then download them.
@@ -102,14 +104,20 @@ public class HomeFragment extends Fragment {
 
                             String subString = c.getChunkName().substring(0, c.getChunkName().length() - 10);
                             final String folderString = subString.replace(".","");
-                            String fileDownloadLocation = c.getSenderID() + "/" + folderString + "/" + c.getChunkName();
+                            final String fileDownloadLocation = c.getSenderID() + "/" + folderString + "/" + c.getChunkName();
 
                             // Attempt to download chunks.
                             ChunkHelper.downloadChunk(fileDownloadLocation).enqueue(new Callback<ResponseBody>() {
                                 @Override
                                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
                                     System.out.println("Successfully Downloaded Temp: " + c.getChunkName());
+                                    // Save chunk in memory
                                     File out = ChunkHelper.saveChunkTemp(response.body(), getContext().getFilesDir()+"/temp/"+ folderString ,c.getChunkName());
+                                    // Delete chunk from server
+                                    ChunkHelper.deleteChunkFromServer(fileDownloadLocation, c.getSenderID(), folderString);
+                                    System.out.println("Deleted from server");
+
                                     downloadedChunks.add(new ChunkFile(out, out.getName(), out.length()));
                                     if (downloadedChunks.size() == chunkLinks.size()) {
                                         // Put back together!
@@ -141,13 +149,16 @@ public class HomeFragment extends Fragment {
     private void putFileBackTogether(ArrayList<ChunkFile> chunks){
         if (chunks.size() > 0) {
             try {
+                System.out.println("merging");
                 File mergedFile = FileHelper.merge(chunks.get(0).getFile());
                 String originalName = chunks.get(0).getOriginalname();
                 String keyName = originalName.substring(0, originalName.length()-10);
                 byte[] decryptKey = CryptoHelper.getKey(keyName);
+                System.out.println("decrypting");
                 File decryptedFile = FileHelper.decrypt(decryptKey, mergedFile, mergedFile, true);
+                System.out.println("decompressing");
                 File normalFile = FileHelper.decompress(decryptedFile, decryptedFile, true);
-                System.out.println("File Downloaded: "  + normalFile.length() + " bytes");
+                System.out.println("Normal File Ready");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -201,8 +212,25 @@ public class HomeFragment extends Fragment {
                                 }
                             }
                         }
-                        // Tell the selected devices to upload the chunks so they can be downloaded.
-                        setJobList(finalDevicesToDownloadFrom);
+                        // Only set to download if all chunks are online.
+                        FileHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (DataSnapshot file : dataSnapshot.getChildren()) {
+                                    if (file.getKey().equals(fileToCheck.getUid())) {
+                                        PSFile f = file.getValue(PSFile.class);
+                                        if (finalDevicesToDownloadFrom.size() == f.getChunkAmount()) {
+                                            // Tell the selected devices to upload the chunks so they can be downloaded.
+                                            setJobList(finalDevicesToDownloadFrom);
+                                        }
+                                    }
+                                }
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {}
+                        });
+
+
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {

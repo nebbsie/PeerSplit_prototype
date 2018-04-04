@@ -28,7 +28,6 @@ public class ConnectivityHelper{
     public static Long CURERNTTIME = 0L;
 
 
-
     public static long getEpochMinute(){
         new Thread() {
             public void run() {

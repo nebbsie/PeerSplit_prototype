@@ -4,7 +4,11 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" android:protectionLevel="signature"/>
+
+    <permission
+        android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -19,14 +23,15 @@
         <activity android:name=".Controllers.LoginController">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".Controllers.RegisterController" />
         <activity android:name=".Controllers.HomeController" />
         <activity android:name=".Controllers.UploadController" />
-        <activity android:name=".Controllers.WelcomeController"/>
-
+        <activity android:name=".Controllers.WelcomeController" />
+        <activity android:name=".Controllers.FileInfoPageController"></activity>
     </application>
 
 </manifest>
