@@ -138,7 +138,7 @@ public class HomeController extends FragmentActivity implements Serializable {
                                                         @Override
                                                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                                                             Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
-                                                            writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c);
+                                                            ChunkHelper.writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c, originalUserID, fileID, chunkID);
                                                             ChunkHelper.deleteChunkFromServer(fileToDelete, _user.getUserID(), fileNameNoDots );
                                                         }
                                                         @Override
@@ -180,53 +180,7 @@ public class HomeController extends FragmentActivity implements Serializable {
 
 
 
-    private boolean writeResponseBodyToDisk(ResponseBody body, String location, String chunkName, ChunkLink link) {
-        try {
-            // Create file to store data from server.
-            File file = new File(location);
-            file.mkdirs();
-            File futureStudioIconFile = new File(file, chunkName);
 
-
-            ChunkFile f = new ChunkFile(futureStudioIconFile, futureStudioIconFile.getName(), futureStudioIconFile.length());
-            ChunkHelper.addStoredChunk(f);
-            System.out.println("Downloaded Chunk: " + f.getOriginalname());
-            link.setBeingStored(true);
-            DatabaseReference ref = ChunkHelper.ref;
-            ref.child(originalUserID).child(fileID).child(chunkID).setValue(link);
-
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
-            try {
-                byte[] fileReader = new byte[4096];
-                long fileSize = body.contentLength();
-                long fileSizeDownloaded = 0;
-                inputStream = body.byteStream();
-                outputStream = new FileOutputStream(futureStudioIconFile);
-                while (true) {
-                    int read = inputStream.read(fileReader);
-                    if (read == -1) {
-                        break;
-                    }
-                    outputStream.write(fileReader, 0, read);
-                    fileSizeDownloaded += read;
-                }
-                outputStream.flush();
-                return true;
-            } catch (IOException e) {
-                return false;
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            }
-        } catch (IOException e) {
-            return false;
-        }
-    }
 
     // Setup the fragment holder.
     private void setupFragments(){

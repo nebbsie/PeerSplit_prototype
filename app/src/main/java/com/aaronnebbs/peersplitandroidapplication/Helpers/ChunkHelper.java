@@ -16,8 +16,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
@@ -169,8 +172,50 @@ public class ChunkHelper {
         PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
         // Set the responce to the uploadfiles.
         return psc.downloadFileWithFixedUrl(ConnectivityHelper.createPartFromString(fileToDownload));
+    }
 
+    public static boolean writeResponseBodyToDisk(ResponseBody body, String location, String chunkName, ChunkLink link, String originalUserID, String fileID, String chunkID) {
+        try {
+            // Create file to store data from server.
+            File file = new File(location);
+            file.mkdirs();
+            File futureStudioIconFile = new File(file, chunkName);
 
+            ChunkFile f = new ChunkFile(futureStudioIconFile, futureStudioIconFile.getName(), futureStudioIconFile.length());
+            ChunkHelper.addStoredChunk(f);
+            System.out.println("Downloaded Chunk: " + f.getOriginalname());
+            link.setBeingStored(true);
+            DatabaseReference ref = ChunkHelper.ref;
+            ref.child(originalUserID).child(fileID).child(chunkID).setValue(link);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+            try {
+                byte[] fileReader = new byte[4096];
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(futureStudioIconFile);
+                while (true) {
+                    int read = inputStream.read(fileReader);
+                    if (read == -1) {
+                        break;
+                    }
+                    outputStream.write(fileReader, 0, read);
+                }
+                outputStream.flush();
+                return true;
+            } catch (IOException e) {
+                return false;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
     }
 
 }
