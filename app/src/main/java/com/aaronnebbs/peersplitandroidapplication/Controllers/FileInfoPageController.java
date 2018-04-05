@@ -4,14 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
@@ -49,7 +52,11 @@ public class FileInfoPageController extends Activity {
 
     private TextView fileName;
     private TextView fileSize;
+
     private ImageView downloadedImage;
+    private VideoView videoView;
+
+
     private Button downloadButton;
     private TextView currentStatus;
     private View fileInfoBar;
@@ -73,6 +80,7 @@ public class FileInfoPageController extends Activity {
         progressBar = findViewById(R.id.download_loadingBar);
         backButton = findViewById(R.id.fileInfo_back);
         downloadButton = findViewById(R.id.downloadFileButton);
+        videoView = findViewById(R.id.downloadedVideoView);
         defaultView();
 
         Bundle extras = getIntent().getExtras();
@@ -200,20 +208,34 @@ public class FileInfoPageController extends Activity {
                         File output = FileHelper.decompress(decryptedFile, decryptedFile, true);
                         System.out.println("Normal File Ready");
 
-                        if (ImageSelector.isImage(output.getName())) {
-                            System.out.println("Image: " + output.getName() + " path: " + output.getPath());
+                        final String path = output.getPath().substring(0, output.getPath().length()-1);
 
-                            /*Bitmap myBitmap = BitmapFactory.decodeFile(output.getPath());
-                            downloadedImage.setImageBitmap(myBitmap);*/
-                            success();
-                            imageView();
-                        }else {
+                        // If the file is an image show it on the screen.
+                        if (ImageSelector.isImage(output.getName())) {
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Bitmap myBitmap = BitmapFactory.decodeFile(path);
+                                    downloadedImage.setImageBitmap(myBitmap);
+                                    success();
+                                    imageView();
+                                }
+                            });
+                        }else if (ImageSelector.isVideo(output.getName())) {
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    videoView.setVideoPath(path);
+                                    MediaController m = new MediaController(FileInfoPageController.this);
+                                    videoView.setMediaController(m);
+                                    videoView.start();
+                                    success();
+                                    videoView();
+                                }
+                            });
+                        } else {
                             success();
                         }
-
-
                     } catch (Exception e) {
-                        error();
+                        error("FAILED");
                     }
                 }
             }).start();
@@ -253,7 +275,10 @@ public class FileInfoPageController extends Activity {
                             u.setUserID(user.getKey());
                             // Only get users that are online
                             if(UserManager.getIfOnline(u)){
-                                users.add(u);
+                                if (!u.getUserID().equals(UserManager.user.getUid())) {
+                                    users.add(u);
+                                    System.out.println("Added user: " + u.getUsername());
+                                }
                             }
                         }
                         // Only select chunks if the user is online and the chunk has not been added already.
@@ -272,6 +297,8 @@ public class FileInfoPageController extends Activity {
                         if (finalDevicesToDownloadFrom.size() == fileDownloading.getChunkAmount()) {
                             // Tell the selected devices to upload the chunks so they can be downloaded.
                             setJobList(finalDevicesToDownloadFrom);
+                        }else{
+                            error("ONE OR MORE CHUNKS OFFLINE, TRY AGAIN!");
                         }
 
 
@@ -320,14 +347,19 @@ public class FileInfoPageController extends Activity {
         downloadButton.setVisibility(View.INVISIBLE);
     }
 
-    private void error(){
+    private void error(String str){
         progressBar.setVisibility(View.INVISIBLE);
-        currentStatus.setText("ERROR TRY AGAIN");
+        currentStatus.setText(str);
     }
 
     private void imageView(){
         fileInfoBar.setVisibility(View.INVISIBLE);
-       downloadedImage.setVisibility(View.VISIBLE);
+        downloadedImage.setVisibility(View.VISIBLE);
+    }
+
+    private void videoView(){
+        fileInfoBar.setVisibility(View.INVISIBLE);
+        videoView.setVisibility(View.VISIBLE);
     }
 
     private void downloadingView(){

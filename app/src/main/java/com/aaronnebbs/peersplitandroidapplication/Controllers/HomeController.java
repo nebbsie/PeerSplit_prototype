@@ -60,6 +60,8 @@ public class HomeController extends FragmentActivity implements Serializable {
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
 
+    private ArrayList<String> downloadedChunks = new ArrayList<>();
+
     private String originalUserID;
     private String chunkID;
     private String fileID;
@@ -132,21 +134,23 @@ public class HomeController extends FragmentActivity implements Serializable {
                                                     final String fileToDelete = _user.getUserID() + "/" + fileNameNoDots  + "/" + c.getChunkName();
                                                     final String fileDownloadLocation = getFilesDir().getPath()+"/chunks/"+c.getFileName();
 
-                                                    // Start the upload and set the callback.
-                                                    Call<ResponseBody> call = ChunkHelper.downloadChunk(fileToDelete);
-                                                    call.enqueue(new Callback<ResponseBody>() {
-                                                        @Override
-                                                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                                            Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
-                                                            ChunkHelper.writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c, originalUserID, fileID, chunkID);
-                                                            ChunkHelper.deleteChunkFromServer(fileToDelete, _user.getUserID(), fileNameNoDots );
-                                                        }
-                                                        @Override
-                                                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                                            Toast.makeText(getApplicationContext(), "Failed to download chunk!", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    });
-
+                                                    if (!checkIfDownloaded(chunkID)) {
+                                                        downloadedChunks.add(chunkID);
+                                                        // Start the upload and set the callback.
+                                                        Call<ResponseBody> call = ChunkHelper.downloadChunk(fileToDelete);
+                                                        call.enqueue(new Callback<ResponseBody>() {
+                                                            @Override
+                                                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                                Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
+                                                                ChunkHelper.writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c, originalUserID, fileID, chunkID);
+                                                                ChunkHelper.deleteChunkFromServer(fileToDelete, _user.getUserID(), fileNameNoDots );
+                                                            }
+                                                            @Override
+                                                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                                Toast.makeText(getApplicationContext(), "Failed to download chunk!", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        });
+                                                    }
                                                 }
                                             }else{
                                                 // Check if local storage has files that have been deleted from cloud and are no longer needing to be hosted.
@@ -179,7 +183,14 @@ public class HomeController extends FragmentActivity implements Serializable {
     }
 
 
-
+    private boolean checkIfDownloaded(String str){
+        for (String uid: downloadedChunks) {
+            if (uid.equals(str)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     // Setup the fragment holder.

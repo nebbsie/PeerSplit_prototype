@@ -33,7 +33,16 @@ public class ImageSelector {
 
     public static boolean isImage(String str){
         String[] strings = str.split(Pattern.quote("."));
-        if(Arrays.asList(pictureFormats).contains(strings[1]) || Arrays.asList(videoFormats).contains(strings[1].toLowerCase())){
+        if(Arrays.asList(pictureFormats).contains(strings[1]) || Arrays.asList(pictureFormats).contains(strings[1].toLowerCase())){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public static boolean isVideo(String str){
+        String[] strings = str.split(Pattern.quote("."));
+        if(Arrays.asList(videoFormats).contains(strings[1]) || Arrays.asList(videoFormats).contains(strings[1].toLowerCase())){
             return true;
         }else {
             return false;

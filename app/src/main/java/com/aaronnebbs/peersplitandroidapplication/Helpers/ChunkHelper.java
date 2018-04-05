@@ -223,7 +223,7 @@ public class ChunkHelper {
 
             ChunkFile f = new ChunkFile(futureStudioIconFile, futureStudioIconFile.getName(), futureStudioIconFile.length());
             ChunkHelper.addStoredChunk(f);
-            System.out.println("Downloaded Chunk: " + f.getOriginalname());
+            System.out.println("Saving Chunk To File: " + f.getOriginalname());
             link.setBeingStored(true);
             DatabaseReference ref = ChunkHelper.ref;
             ref.child(originalUserID).child(fileID).child(chunkID).setValue(link);
