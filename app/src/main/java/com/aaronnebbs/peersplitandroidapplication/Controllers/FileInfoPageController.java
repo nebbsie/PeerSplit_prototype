@@ -52,6 +52,7 @@ public class FileInfoPageController extends Activity {
 
     private TextView fileName;
     private TextView fileSize;
+    private TextView chunksInfo;
 
     private ImageView downloadedImage;
     private VideoView videoView;
@@ -81,6 +82,7 @@ public class FileInfoPageController extends Activity {
         backButton = findViewById(R.id.fileInfo_back);
         downloadButton = findViewById(R.id.downloadFileButton);
         videoView = findViewById(R.id.downloadedVideoView);
+        chunksInfo = findViewById(R.id.chunksFileInfo);
         defaultView();
 
         Bundle extras = getIntent().getExtras();
@@ -93,6 +95,8 @@ public class FileInfoPageController extends Activity {
 
         fileName.setText(fileDownloading.getFileName());
         fileSize.setText(FileHelper.getFileSizeString(fileDownloading.getTotalSize()));
+
+        setupLiveViewOnlineDevices(row);
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +112,80 @@ public class FileInfoPageController extends Activity {
             public void onClick(View view) {
                 Intent i = new Intent(getApplicationContext(), HomeController.class);
                 startActivity(i);
+            }
+        });
+    }
+
+    private void setupLiveViewOnlineDevices(final HomePageRow fileToCheck) {
+
+        // Get information about users.
+        final ArrayList<ChunkLink> availableToDownloadFrom = new ArrayList<>();
+        final ArrayList<ChunkLink> finalDevicesToDownloadFrom = new ArrayList<>();
+
+        // Get all users that have a chunk for the file stored on their device.
+        ChunkHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
+                    for (DataSnapshot file : user.getChildren()) {
+                        if(file.getKey().equals(fileToCheck.getUid())) {
+                            for (DataSnapshot chunk : file.getChildren()) {
+                                ChunkLink link = chunk.getValue(ChunkLink.class);
+                                if (link.isBeingStored()) {
+                                    availableToDownloadFrom.add(link);
+                                }
+                            }
+                        }
+                    }
+                }
+                // Get all of the users and only add them if they are online.
+                final ArrayList<User> users = new ArrayList<>();
+                UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        // Get each user.
+                        for (DataSnapshot user : dataSnapshot.getChildren()) {
+                            User u = user.getValue(User.class);
+                            u.setUserID(user.getKey());
+                            // Only get users that are online
+                            if(UserManager.getIfOnline(u)){
+                                if (!u.getUserID().equals(UserManager.user.getUid())) {
+                                    users.add(u);
+                                }
+                            }
+                        }
+
+                        // Only select chunks if the user is online and the chunk has not been added already.
+                        // Check for multiple chunks.
+                        for (ChunkLink chunk : availableToDownloadFrom) {
+                            // Check if the chunk has already been added.
+                            if(!checkDevices(chunk.getChunkName(), finalDevicesToDownloadFrom)){
+                                // Check if the user is available.
+                                if(getUserByID(chunk.getUserID(), users)){
+                                    finalDevicesToDownloadFrom.add(chunk);
+                                }
+                            }
+                        }
+
+                        if (finalDevicesToDownloadFrom.size() != fileDownloading.getChunkAmount()) {
+                            System.out.println("Not Avalible For Download At The moment");
+                        }else{
+                            System.out.println("Ready!");
+                        }
+
+                        chunksInfo.setText("" + finalDevicesToDownloadFrom.size() + " / " + fileDownloading.getChunkAmount());
+
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }

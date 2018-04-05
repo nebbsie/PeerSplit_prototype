@@ -35,6 +35,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
 public class UploadController extends Activity {
     private static final int READ_REQUEST_CODE = 42;
     private PieView uploadingChart;
@@ -225,6 +226,8 @@ public class UploadController extends Activity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Toast.makeText(getApplicationContext(), "Uploaded files!", Toast.LENGTH_SHORT).show();
+                // Delete the temp files.
+                FileHelper.deleteRecursive(chunks.get(0).getFile().getParentFile().getParentFile());
                 // Selects what devices will recieve the chunks.
                 selectDevicesForFiles(chunks, availibleUsers);
                 uploadMode();
@@ -239,6 +242,8 @@ public class UploadController extends Activity {
             }
         });
     }
+
+
 
     // Sets the file upload parts to visible and hides the select file button to invisible.
     private void selectionMode(){

@@ -134,13 +134,7 @@ public class ChunkHelper {
             String folderName = c.getOriginalname().substring(0, c.getOriginalname().length() - 10);
             String filePath = context.getFilesDir().getPath()+"/chunks/"+folderName+"/"+c.getFile().getName();
             File f = new File(filePath);
-            f.delete();
-
-            if(f.exists()){
-                if(f.getParentFile().list().length == 0){
-                    f.getParentFile().delete();
-                }
-            }
+            FileHelper.deleteRecursive(f.getParentFile());
         }
         storedChunks.removeAll(chunksToDelete);
         setStoredChunks();

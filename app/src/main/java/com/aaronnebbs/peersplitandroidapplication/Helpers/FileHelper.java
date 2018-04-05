@@ -403,4 +403,13 @@ public class FileHelper {
         }
         return new File(output.getPath().substring(0, output.getPath().length()-3));
     }
+
+    // Delete everything in a folder.
+    public static void deleteRecursive(File loc) {
+        if (loc.isDirectory())
+            for (File child : loc.listFiles())
+                deleteRecursive(child);
+
+        loc.delete();
+    }
 }
