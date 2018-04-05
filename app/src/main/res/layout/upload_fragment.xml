@@ -10,7 +10,7 @@
     <!-- TODO: Update blank fragment layout -->
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/fileInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="43dp"
@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/fileSelectedBar"
+        android:id="@+id/fileInfoBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -131,7 +131,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fileSelectedBar" />
+        app:layout_constraintTop_toBottomOf="@+id/fileInfoBar" />
 
     <TextView
         android:id="@+id/clickToSelectFileButton"
@@ -161,11 +161,11 @@
         android:layout_marginTop="8dp"
         android:background="@android:drawable/ic_delete"
         android:backgroundTint="@color/colorPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@+id/textView6"
-        app:layout_constraintEnd_toEndOf="@+id/fileSelectedBar"
+        app:layout_constraintBottom_toBottomOf="@+id/fileInfo"
+        app:layout_constraintEnd_toEndOf="@+id/fileInfoBar"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView6"
+        app:layout_constraintTop_toTopOf="@+id/fileInfo"
         app:layout_constraintVertical_bias="0.62" />
 
     <ProgressBar
@@ -178,7 +178,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/fileSelectedBar"
+        app:layout_constraintBottom_toBottomOf="@+id/fileInfoBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/clickToSelectFileButton"
@@ -194,7 +194,7 @@
         android:background="@drawable/backward_arrow"
         android:backgroundTint="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="@+id/removeFile_upload"
-        app:layout_constraintEnd_toStartOf="@+id/textView6"
+        app:layout_constraintEnd_toStartOf="@+id/fileInfo"
         app:layout_constraintHorizontal_bias="0.2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/removeFile_upload" />

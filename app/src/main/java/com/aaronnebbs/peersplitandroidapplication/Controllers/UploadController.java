@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
@@ -16,14 +15,9 @@ import android.widget.Toast;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.PeerSplitClient;
-import com.aaronnebbs.peersplitandroidapplication.Helpers.RetrofitBuilderGenerator;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
-import com.aaronnebbs.peersplitandroidapplication.Model.JobType;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
 import com.aaronnebbs.peersplitandroidapplication.R;
@@ -31,21 +25,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+
 import az.plainpie.PieView;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UploadController extends Activity {
     private static final int READ_REQUEST_CODE = 42;
@@ -286,7 +274,7 @@ public class UploadController extends Activity {
     private void setupUI(){
         // Setup the widgets
         uploadingChart = findViewById(R.id.fileUploadingPieChart);
-        selectedFileLayout = findViewById(R.id.fileSelectedBar);
+        selectedFileLayout = findViewById(R.id.fileInfoBar);
         fileName = findViewById(R.id.fileName_upload);
         fileSize = findViewById(R.id.fileSize_upload);
         uploadButton = findViewById(R.id.uploadFileButton);
