@@ -36,10 +36,8 @@ public class ConnectivityHelper{
                     BufferedReader in = new BufferedReader(new InputStreamReader(getIP.openStream()));
                     String time = in.readLine();
                     CURERNTTIME =  Long.valueOf(time);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println("Failed To Get Time From Server");
                 }
             }
         }.start();

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +23,8 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ImageSelector;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkLink;
@@ -66,6 +70,9 @@ public class FileInfoPageController extends Activity {
     private PSFile fileDownloading;
     private HomePageRow row;
     private Button backButton;
+    private File output;
+
+    private Handler updateChunkInfo;
 
 
     @Override
@@ -96,6 +103,7 @@ public class FileInfoPageController extends Activity {
         fileName.setText(fileDownloading.getFileName());
         fileSize.setText(FileHelper.getFileSizeString(fileDownloading.getTotalSize()));
 
+        downloadButton.setVisibility(View.INVISIBLE);
         setupLiveViewOnlineDevices(row);
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
@@ -110,84 +118,101 @@ public class FileInfoPageController extends Activity {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                cleanUpDirectory();
                 Intent i = new Intent(getApplicationContext(), HomeController.class);
                 startActivity(i);
             }
         });
     }
 
+    // Delete the files that have been stored.
+    private void cleanUpDirectory() {
+        if (output != null) {
+            FileHelper.deleteRecursive(output.getParentFile().getParentFile());
+        }
+
+    }
+
+
+    // Gets information about chunks, if they are online etc.
     private void setupLiveViewOnlineDevices(final HomePageRow fileToCheck) {
 
-        // Get information about users.
-        final ArrayList<ChunkLink> availableToDownloadFrom = new ArrayList<>();
-        final ArrayList<ChunkLink> finalDevicesToDownloadFrom = new ArrayList<>();
 
-        // Get all users that have a chunk for the file stored on their device.
-        ChunkHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot user : dataSnapshot.getChildren()) {
-                    for (DataSnapshot file : user.getChildren()) {
-                        if(file.getKey().equals(fileToCheck.getUid())) {
-                            for (DataSnapshot chunk : file.getChildren()) {
-                                ChunkLink link = chunk.getValue(ChunkLink.class);
-                                if (link.isBeingStored()) {
-                                    availableToDownloadFrom.add(link);
-                                }
-                            }
-                        }
-                    }
-                }
-                // Get all of the users and only add them if they are online.
-                final ArrayList<User> users = new ArrayList<>();
-                UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        updateChunkInfo = new Handler();
+        final int delay = 5000; //milliseconds
+        updateChunkInfo.postDelayed(new Runnable(){
+            public void run(){
+                // Get information about users.
+                final ArrayList<ChunkLink> availableToDownloadFrom = new ArrayList<>();
+                final ArrayList<ChunkLink> finalDevicesToDownloadFrom = new ArrayList<>();
+
+
+                // Get all users that have a chunk for the file stored on their device.
+                ChunkHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        // Get each user.
                         for (DataSnapshot user : dataSnapshot.getChildren()) {
-                            User u = user.getValue(User.class);
-                            u.setUserID(user.getKey());
-                            // Only get users that are online
-                            if(UserManager.getIfOnline(u)){
-                                if (!u.getUserID().equals(UserManager.user.getUid())) {
-                                    users.add(u);
+                            for (DataSnapshot file : user.getChildren()) {
+                                if(file.getKey().equals(fileToCheck.getUid())) {
+                                    for (DataSnapshot chunk : file.getChildren()) {
+                                        ChunkLink link = chunk.getValue(ChunkLink.class);
+                                        if (link.isBeingStored()) {
+                                            availableToDownloadFrom.add(link);
+                                        }
+                                    }
                                 }
                             }
                         }
-
-                        // Only select chunks if the user is online and the chunk has not been added already.
-                        // Check for multiple chunks.
-                        for (ChunkLink chunk : availableToDownloadFrom) {
-                            // Check if the chunk has already been added.
-                            if(!checkDevices(chunk.getChunkName(), finalDevicesToDownloadFrom)){
-                                // Check if the user is available.
-                                if(getUserByID(chunk.getUserID(), users)){
-                                    finalDevicesToDownloadFrom.add(chunk);
+                        // Get all of the users and only add them if they are online.
+                        final ArrayList<User> users = new ArrayList<>();
+                        UserManager.userDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                // Get each user.
+                                for (DataSnapshot user : dataSnapshot.getChildren()) {
+                                    User u = user.getValue(User.class);
+                                    u.setUserID(user.getKey());
+                                    // Only get users that are online
+                                    if(UserManager.getIfOnline(u)){
+                                        if (!u.getUserID().equals(UserManager.user.getUid())) {
+                                            users.add(u);
+                                        }
+                                    }
                                 }
+                                // Only select chunks if the user is online and the chunk has not been added already.
+                                // Check for multiple chunks.
+                                for (ChunkLink chunk : availableToDownloadFrom) {
+                                    // Check if the chunk has already been added.
+                                    if(!checkDevices(chunk.getChunkName(), finalDevicesToDownloadFrom)){
+                                        // Check if the user is available.
+                                        if(getUserByID(chunk.getUserID(), users)){
+                                            finalDevicesToDownloadFrom.add(chunk);
+                                        }
+                                    }
+                                }
+                                // Check if all chunks are online.
+                                if (finalDevicesToDownloadFrom.size() != fileDownloading.getChunkAmount()) {
+                                    downloadButton.setVisibility(View.INVISIBLE);
+                                }else{
+                                    downloadButton.setVisibility(View.VISIBLE);
+                                }
+
+                                chunksInfo.setText("" + finalDevicesToDownloadFrom.size() + " / " + fileDownloading.getChunkAmount());
                             }
-                        }
-
-                        if (finalDevicesToDownloadFrom.size() != fileDownloading.getChunkAmount()) {
-                            System.out.println("Not Avalible For Download At The moment");
-                        }else{
-                            System.out.println("Ready!");
-                        }
-
-                        chunksInfo.setText("" + finalDevicesToDownloadFrom.size() + " / " + fileDownloading.getChunkAmount());
-
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) { }
+                        });
                     }
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
+                    public void onCancelled(DatabaseError databaseError) { }
                 });
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
+                updateChunkInfo.postDelayed(this, delay);
             }
-        });
+        }, 0);
+
+
+
     }
 
     // Sets a job in Firebase to tell device to upload chunk.
@@ -283,10 +308,13 @@ public class FileInfoPageController extends Activity {
                         File decryptedFile = decryptedFile = FileHelper.decrypt(decryptKey, mergedFile, mergedFile, true);
                         System.out.println("decompressing");
                         currentStatus.setText("UNCOMPRESSING FILE");
-                        File output = FileHelper.decompress(decryptedFile, decryptedFile, true);
+                        output = FileHelper.decompress(decryptedFile, decryptedFile, true);
                         System.out.println("Normal File Ready");
 
                         final String path = output.getPath().substring(0, output.getPath().length()-1);
+
+                        // Stop the chunk updater handler.
+                        updateChunkInfo.removeCallbacksAndMessages(null);
 
                         // If the file is an image show it on the screen.
                         if (ImageSelector.isImage(output.getName())) {
@@ -312,6 +340,9 @@ public class FileInfoPageController extends Activity {
                         } else {
                             success();
                         }
+
+
+
                     } catch (Exception e) {
                         error("FAILED");
                     }
@@ -433,16 +464,24 @@ public class FileInfoPageController extends Activity {
     private void imageView(){
         fileInfoBar.setVisibility(View.INVISIBLE);
         downloadedImage.setVisibility(View.VISIBLE);
+        downloadButton.setVisibility(View.INVISIBLE);
     }
 
     private void videoView(){
         fileInfoBar.setVisibility(View.INVISIBLE);
         videoView.setVisibility(View.VISIBLE);
+        downloadButton.setVisibility(View.INVISIBLE);
     }
 
     private void downloadingView(){
         currentStatus.setVisibility(View.VISIBLE);
         currentStatus.setText("DOWNLOADING CHUNKS");
         progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
     }
 }
