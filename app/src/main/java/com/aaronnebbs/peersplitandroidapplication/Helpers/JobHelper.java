@@ -80,7 +80,7 @@ public class JobHelper {
             final ChunkFile f = ChunkHelper.getChunk(job.getData());
             // If the chunk is valid, attempt to upload.
             if(f!=null){
-                ChunkHelper.uploadChunk(f).enqueue(new Callback<ResponseBody>() {
+                ChunkHelper.uploadChunk(f, UserManager.user.getUid()).enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         jobsDone.add(jobID);

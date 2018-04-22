@@ -298,16 +298,17 @@ public class FileInfoPageController extends Activity {
                 public void run() {
                     try {
                         System.out.println("merging");
-                        currentStatus.setText("MERGING CHUNKS");
+
+                        updateInfoMessage(1);
                         File mergedFile = FileHelper.merge(chunks.get(0).getFile());
                         String originalName = chunks.get(0).getOriginalname();
                         String keyName = originalName.substring(0, originalName.length()-10);
                         byte[] decryptKey = CryptoHelper.getKey(keyName);
                         System.out.println("decrypting");
-                        currentStatus.setText("DECRYPTING FILE!");
+                        updateInfoMessage(2);
                         File decryptedFile = decryptedFile = FileHelper.decrypt(decryptKey, mergedFile, mergedFile, true);
                         System.out.println("decompressing");
-                        currentStatus.setText("UNCOMPRESSING FILE");
+                        updateInfoMessage(3);
                         output = FileHelper.decompress(decryptedFile, decryptedFile, true);
                         System.out.println("Normal File Ready");
 
@@ -341,14 +342,34 @@ public class FileInfoPageController extends Activity {
                             success();
                         }
 
-
-
                     } catch (Exception e) {
+                        e.printStackTrace();
                         error("FAILED");
+
                     }
                 }
             }).start();
         }
+    }
+
+    private void updateInfoMessage(final int num){
+        runOnUiThread(new Runnable() {
+            public void run() {
+                switch (num){
+                    case 1:
+                        currentStatus.setText("MERGING CHUNKS");
+                        break;
+
+                    case 2:
+                        currentStatus.setText("DECRYPTING FILE!");
+                        break;
+
+                    case 3:
+                        currentStatus.setText("UNCOMPRESSING FILE");
+                        break;
+                }
+            }
+        });
     }
 
     // Gets a list of available devices to get the chunks from.
@@ -483,5 +504,11 @@ public class FileInfoPageController extends Activity {
     public void onResume() {
         super.onResume();
         this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.out.println("on destroy file info");
+        super.onDestroy();
     }
 }

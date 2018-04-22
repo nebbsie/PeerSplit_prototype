@@ -51,6 +51,7 @@ public class UploadController extends Activity {
     private ArrayList<ChunkFile> chunks;
     private ArrayList<User> availibleUsers;
     private long orignalFileSize;
+    private TextView devicesInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +148,7 @@ public class UploadController extends Activity {
                                 return;
                             }else{
                                 chunks = FileHelper.splitFileIntoChunks(encr, true, availibleUsers.size());
+                                devicesInfo.setText("" + chunks.size() + " / " + availibleUsers.size());
                             }
                         }
                         @Override
@@ -174,6 +176,7 @@ public class UploadController extends Activity {
         DatabaseReference ref = UserManager.userDatabaseReference.getParent();
         // Hash the file name to get a unique id for file on firebase.
         int hashRes = chunks.get(0).getOriginalname().hashCode();
+        System.out.println(chunks.get(0).getOriginalname());
         String fileID = Integer.toHexString(hashRes);
         String nameWithoutEncoding = chunks.get(0).getOriginalname().substring(0, chunks.get(0).getOriginalname().length() - 6);
         // Create a file for use in firebase.
@@ -182,6 +185,7 @@ public class UploadController extends Activity {
         ref.child("files").child(fileID).setValue(file);
         int availibleCounter = 0;
         // Go through all chunks
+        //TODO: make this choose devices based on storage space? etc.
         for(ChunkFile c : chunks){
             // Make sure counter does not go over the max.
             if(availibleCounter > availibleDevices.size()){
@@ -243,8 +247,6 @@ public class UploadController extends Activity {
         });
     }
 
-
-
     // Sets the file upload parts to visible and hides the select file button to invisible.
     private void selectionMode(){
         clickToSelectFile.setVisibility(View.VISIBLE);
@@ -288,6 +290,8 @@ public class UploadController extends Activity {
         loadingBar = findViewById(R.id.upload_loadingBar);
         fileStatus = findViewById(R.id.upload_statusBarTitle);
         goBack = findViewById(R.id.fileUpload_back);
+        devicesInfo = findViewById(R.id.devicesInfoUpload);
+        devicesInfo.setText("WAITING...");
 
         // Set bar colour
         uploadingChart.setPercentageBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -307,6 +311,13 @@ public class UploadController extends Activity {
     public void onResume() {
         super.onResume();
         this.overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        System.out.println("on destroy upload controller");
+        super.onDestroy();
     }
 
 

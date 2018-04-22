@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -42,6 +43,18 @@ public class ConnectivityHelper{
             }
         }.start();
         return CURERNTTIME;
+    }
+
+    public static boolean checkConnection(){
+        try {
+            URL url = new URL("http://peersplit.com");
+            URLConnection con = url.openConnection();
+            con.connect();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 
 

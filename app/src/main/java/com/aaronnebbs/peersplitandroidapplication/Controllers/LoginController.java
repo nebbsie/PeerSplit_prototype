@@ -79,7 +79,7 @@ public class LoginController extends Activity {
     }
 
     // Attempts to login user.
-    private void attemptLogin(){
+    private int attemptLogin(){
         boolean attemptLogin = true;
 
         // Check if the username is empty.
@@ -121,6 +121,8 @@ public class LoginController extends Activity {
                         }
                     });
         }
+
+        return 0;
     }
 
     // Links to the register page.
@@ -150,6 +152,12 @@ public class LoginController extends Activity {
         super.onResume();
         // Start the animation
         this.overridePendingTransition(R.anim.push_right_enter, R.anim.push_right_exit);
+    }
+
+    @Override
+    protected void onStop() {
+        System.out.println("STOPPED LOGIN");
+        super.onStop();
     }
 
     @Override

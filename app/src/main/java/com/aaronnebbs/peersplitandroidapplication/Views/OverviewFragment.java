@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.HomePageRow;
 import com.aaronnebbs.peersplitandroidapplication.Model.PSFile;
@@ -39,6 +40,11 @@ public class OverviewFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupUI();
+
+        if (!ConnectivityHelper.checkConnection()) {
+            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
+        }
+
         updateUI();
         setupListenerForChunkData();
     }

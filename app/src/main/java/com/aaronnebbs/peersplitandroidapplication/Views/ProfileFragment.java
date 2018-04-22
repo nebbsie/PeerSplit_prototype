@@ -8,8 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.aaronnebbs.peersplitandroidapplication.Controllers.LoginController;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.SettingsHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.User;
@@ -30,7 +32,12 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         SettingsHelper.setup();
         setupUI();
+
         setData();
+
+        if (!ConnectivityHelper.checkConnection()) {
+            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
+        }
         created = true;
 
     }

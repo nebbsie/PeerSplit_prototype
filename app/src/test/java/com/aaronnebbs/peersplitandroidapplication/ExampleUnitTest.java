@@ -1,5 +1,8 @@
 package com.aaronnebbs.peersplitandroidapplication;
 
+import com.aaronnebbs.peersplitandroidapplication.Controllers.LoginController;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;

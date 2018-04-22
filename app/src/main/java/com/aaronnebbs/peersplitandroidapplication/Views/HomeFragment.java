@@ -17,6 +17,7 @@ import com.aaronnebbs.peersplitandroidapplication.Helpers.ChunkHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.CryptoHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.FileHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.JobHelper;
+import com.aaronnebbs.peersplitandroidapplication.Helpers.Network.ConnectivityHelper;
 import com.aaronnebbs.peersplitandroidapplication.Helpers.UserManager;
 import com.aaronnebbs.peersplitandroidapplication.Model.BottomNavBarAdapter;
 import com.aaronnebbs.peersplitandroidapplication.Model.ChunkFile;
@@ -60,8 +61,19 @@ public class HomeFragment extends Fragment {
         adapter = new BottomNavBarAdapter(dataModels, getContext());
         listView.setAdapter(adapter);
 
+
+
+
+        if (!ConnectivityHelper.checkConnection()) {
+            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
+        }
+
+
+
         // Retrieve all of the files that the user has uploaded to the cloud.
         getAllFilesBeingStored();
+
+
 
         // On lick listener for the files on the home page.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

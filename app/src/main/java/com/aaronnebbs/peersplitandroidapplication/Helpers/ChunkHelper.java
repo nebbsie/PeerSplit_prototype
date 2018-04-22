@@ -155,11 +155,11 @@ public class ChunkHelper {
     }
 
     // Uploads multiple chunks to the server.
-    public static Call<ResponseBody> uploadChunk(final ChunkFile chunk){
+    public static Call<ResponseBody> uploadChunk(final ChunkFile chunk, String id){
         // Generate the retrofit boilerplate.
         PeerSplitClient psc = RetrofitBuilderGenerator.generatePeerSplitClient();
         // Set the response to the upload file.
-       return psc.uploadFile(ConnectivityHelper.createPartFromString(UserManager.user.getUid()),ConnectivityHelper.prepareFilePart(chunk.getFile().getName(), chunk.getFile()));
+       return psc.uploadFile(ConnectivityHelper.createPartFromString(id),ConnectivityHelper.prepareFilePart(chunk.getFile().getName(), chunk.getFile()));
     }
 
     // Downloads a single chunk.
