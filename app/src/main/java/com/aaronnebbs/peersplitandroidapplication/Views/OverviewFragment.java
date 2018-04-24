@@ -41,10 +41,6 @@ public class OverviewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupUI();
 
-        if (!ConnectivityHelper.checkConnection()) {
-            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
-        }
-
         updateUI();
         setupListenerForChunkData();
     }

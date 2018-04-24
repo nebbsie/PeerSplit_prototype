@@ -61,28 +61,14 @@ public class HomeFragment extends Fragment {
         adapter = new BottomNavBarAdapter(dataModels, getContext());
         listView.setAdapter(adapter);
 
-
-
-
-        if (!ConnectivityHelper.checkConnection()) {
-            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
-        }
-
-
-
         // Retrieve all of the files that the user has uploaded to the cloud.
         getAllFilesBeingStored();
-
-
 
         // On lick listener for the files on the home page.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final HomePageRow dataModel= dataModels.get(position);
-
-
-
                 // Get the file from online.
                 FileHelper.ref.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -105,17 +91,9 @@ public class HomeFragment extends Fragment {
                     public void onCancelled(DatabaseError databaseError) {}
                 });
 
-
-
-
-
             }
         });
     }
-
-
-
-
 
     // Get all files that are being stored on the network by the user and update the ui.
     private void getAllFilesBeingStored(){

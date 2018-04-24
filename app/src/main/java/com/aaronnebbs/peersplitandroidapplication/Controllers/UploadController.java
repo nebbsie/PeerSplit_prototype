@@ -148,7 +148,12 @@ public class UploadController extends Activity {
                                 return;
                             }else{
                                 chunks = FileHelper.splitFileIntoChunks(encr, true, availibleUsers.size());
-                                devicesInfo.setText("" + chunks.size() + " / " + availibleUsers.size());
+                                if (chunks.size() > 0) {
+                                    devicesInfo.setText("" + chunks.size() + " / " + availibleUsers.size());
+                                }else{
+                                    Toast.makeText(getApplicationContext(), "Failed To Split File!", Toast.LENGTH_SHORT).show();
+                                }
+
                             }
                         }
                         @Override

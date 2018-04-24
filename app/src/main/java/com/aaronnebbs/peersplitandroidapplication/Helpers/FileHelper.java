@@ -41,8 +41,12 @@ public class FileHelper {
 
     // Splits a file into chunks and returns an array with the files.
     public static ArrayList<ChunkFile> splitFileIntoChunks(File input, boolean deleteOriginalFile, int onlineDevices){
+
         // Array list of all chunks.
         ArrayList<ChunkFile> files = new ArrayList<>();
+        if (input == null) {
+            return files;
+        }
         // File to split into chunks, and get name.
         File baseFile = input;
         String fileName = baseFile.getName();
@@ -374,6 +378,8 @@ public class FileHelper {
             System.out.println("DECRYPTION: Input file not found! " + input.getPath());
             return null;
         }
+
+
         // Create the output location if it does not exist.
         if(!output.exists()){
             output.mkdirs();

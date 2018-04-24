@@ -29,9 +29,7 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupUI();
-        if (ConnectivityHelper.checkConnection()) {
-            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
-        }
+
         created = true;
     }
 

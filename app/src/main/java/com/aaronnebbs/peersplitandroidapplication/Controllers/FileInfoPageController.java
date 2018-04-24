@@ -57,11 +57,8 @@ public class FileInfoPageController extends Activity {
     private TextView fileName;
     private TextView fileSize;
     private TextView chunksInfo;
-
     private ImageView downloadedImage;
     private VideoView videoView;
-
-
     private Button downloadButton;
     private TextView currentStatus;
     private View fileInfoBar;
@@ -71,9 +68,7 @@ public class FileInfoPageController extends Activity {
     private HomePageRow row;
     private Button backButton;
     private File output;
-
     private Handler updateChunkInfo;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,22 +251,28 @@ public class FileInfoPageController extends Activity {
                                 @Override
                                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-                                    System.out.println("Successfully Downloaded Temp: " + c.getChunkName());
-                                    // Save chunk in memory
-                                    File out = ChunkHelper.saveChunkTemp(response.body(), getApplicationContext().getFilesDir()+"/temp/"+ folderString ,c.getChunkName());
-                                    // Delete chunk from server
-                                    ChunkHelper.deleteChunkFromServer(fileDownloadLocation, c.getSenderID(), folderString);
-                                    System.out.println("Deleted from server");
+                                    if (response.body() != null) {
+                                        System.out.println("Successfully Downloaded Temp: " + c.getChunkName());
+                                        // Save chunk in memory
+                                        File out = ChunkHelper.saveChunkTemp(response.body(), getApplicationContext().getFilesDir()+"/temp/"+ folderString ,c.getChunkName());
+                                        // Delete chunk from server
+                                        ChunkHelper.deleteChunkFromServer(fileDownloadLocation, c.getSenderID(), folderString);
+                                        System.out.println("Deleted from server");
 
-                                    downloadedChunks.add(new ChunkFile(out, out.getName(), out.length()));
-                                    if (downloadedChunks.size() == chunkLinks.size()) {
-                                        // Put back together!
-                                        putFileBackTogether(downloadedChunks);
+                                        downloadedChunks.add(new ChunkFile(out, out.getName(), out.length()));
+                                        if (downloadedChunks.size() == chunkLinks.size()) {
+                                            // Put back together!
+                                            putFileBackTogether(downloadedChunks);
+                                        }
+                                    }else{
+                                        error("FAILED TO RETRIEVE FILE");
                                     }
+
                                 }
                                 @Override
                                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    Toast.makeText(getApplicationContext(), "Failed to get file! Try again!", Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(getApplicationContext(), "Failed to get file! Try again!", Toast.LENGTH_SHORT).show();
+                                    error("FAILED TO RETRIEVE FILE");
                                 }
                             });
                         }
@@ -286,7 +287,9 @@ public class FileInfoPageController extends Activity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+                error("FAILED TO RETRIEVE FILE");
+            }
         });
 
     }
@@ -306,7 +309,7 @@ public class FileInfoPageController extends Activity {
                         byte[] decryptKey = CryptoHelper.getKey(keyName);
                         System.out.println("decrypting");
                         updateInfoMessage(2);
-                        File decryptedFile = decryptedFile = FileHelper.decrypt(decryptKey, mergedFile, mergedFile, true);
+                        File decryptedFile = FileHelper.decrypt(decryptKey, mergedFile, mergedFile, true);
                         System.out.println("decompressing");
                         updateInfoMessage(3);
                         output = FileHelper.decompress(decryptedFile, decryptedFile, true);
@@ -344,7 +347,7 @@ public class FileInfoPageController extends Activity {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        error("FAILED");
+                        error("FAILED TO RETRIEVE FILE");
 
                     }
                 }
@@ -435,13 +438,13 @@ public class FileInfoPageController extends Activity {
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        error("FAILED TO RETRIEVE FILE");
                     }
                 });
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                error("FAILED TO RETRIEVE FILE");
             }
         });
     }

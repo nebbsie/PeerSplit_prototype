@@ -35,9 +35,6 @@ public class ProfileFragment extends Fragment {
 
         setData();
 
-        if (!ConnectivityHelper.checkConnection()) {
-            Toast.makeText(getContext(), "No Connection", Toast.LENGTH_SHORT).show();
-        }
         created = true;
 
     }

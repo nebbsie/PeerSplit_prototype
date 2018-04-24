@@ -58,26 +58,21 @@ public class HomeController extends FragmentActivity implements Serializable {
     private boolean firstTime;
     private boolean alreadyRunning = false;
     public boolean isUpload;
+    private ArrayList<String> downloadedChunks = new ArrayList<>();
+    private String originalUserID;
+    private String chunkID;
+    private String fileID;
+    private Thread chunkDownloaderThread;
+    private ArrayList<User> availibleUsers;
+    ArrayList<User> usersToDistributeTo;
+    private ArrayList<PSFile> files;
+    private PSFile actualFile;
     // Fragments
     private Fragment selectedFragment;
     private HomeFragment homeActivity;
     private OverviewFragment overviewActivity;
     private ProfileFragment profileActivity;
     private SettingsFragment settingsActivity;
-
-    private ArrayList<String> downloadedChunks = new ArrayList<>();
-
-    private String originalUserID;
-    private String chunkID;
-    private String fileID;
-
-    private Thread chunkDownloaderThread;
-
-
-    private ArrayList<User> availibleUsers;
-    ArrayList<User> usersToDistributeTo;
-    private ArrayList<PSFile> files;
-    private PSFile actualFile;
 
 
     // Called when the page is created.
@@ -117,6 +112,7 @@ public class HomeController extends FragmentActivity implements Serializable {
             @Override
             public void run() {
                 final DatabaseReference ref = UserManager.userDatabaseReference.getParent().child("chunks");
+                // Gets all of the new chunk links when a new one is added.
                 ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -156,13 +152,18 @@ public class HomeController extends FragmentActivity implements Serializable {
                                                         call.enqueue(new Callback<ResponseBody>() {
                                                             @Override
                                                             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                                                System.out.println("response: " + response.body().contentLength());
-                                                                Toast.makeText(getApplicationContext(), "downloaded files!", Toast.LENGTH_SHORT).show();
-                                                                ChunkHelper.writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c, originalUserID, fileID, chunkID);
-                                                                //ChunkHelper.deleteChunkFromServer(fileToDelete, _user.getUserID(), fileNameNoDots );
+                                                                // Check if the response was invalid
+                                                                if (response.body() != null) {
+                                                                    Toast.makeText(getApplicationContext(), "Downloaded Chunk", Toast.LENGTH_SHORT).show();
+                                                                    ChunkHelper.writeResponseBodyToDisk(response.body(), fileDownloadLocation, c.getChunkName(), c, originalUserID, fileID, chunkID);
+                                                                    ChunkHelper.deleteChunkFromServer(fileToDelete, _user.getUserID(), fileNameNoDots );
+                                                                }else {
+                                                                    System.out.println("Corrupted Data When Downloading Chunk From Server");
+                                                                }
                                                             }
                                                             @Override
                                                             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                                System.out.println("Failed to Download Chunk Form Server");
                                                                 Toast.makeText(getApplicationContext(), "Failed to download chunk!", Toast.LENGTH_SHORT).show();
                                                             }
                                                         });
@@ -189,13 +190,14 @@ public class HomeController extends FragmentActivity implements Serializable {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) { }
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.out.println("Canceled getting chunk links");
+                    }
                 });
             }
         });
         chunkDownloaderThread.start();
     }
-
 
     private boolean checkIfDownloaded(String str){
         for (String uid: downloadedChunks) {
@@ -205,7 +207,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         }
         return false;
     }
-
 
     // Setup the fragment holder.
     private void setupFragments(){
@@ -257,7 +258,6 @@ public class HomeController extends FragmentActivity implements Serializable {
                         transaction.commit();
                         return true;
                     }
-
                 }
                 return false;
             }
@@ -312,12 +312,9 @@ public class HomeController extends FragmentActivity implements Serializable {
                                 }
                             }
                         }
-
                         System.out.println("Devices Availible To Move Chunks To: "  + availibleUsers.size());
-
                         // Get all chunks in memory
                         final ArrayList<ChunkFile> storedChunks = ChunkHelper.getStoredChunks();
-
                         // If got chunks
                         if (storedChunks.size() > 0) {
                             // Get all files from server
@@ -329,15 +326,12 @@ public class HomeController extends FragmentActivity implements Serializable {
                                     for (DataSnapshot d : dataSnapshot.getChildren()) {
                                         files.add(d.getValue(PSFile.class));
                                     }
-
                                     // Go through each chunk file.
                                     for (final ChunkFile cf : storedChunks) {
-
                                         // Get name of original file from chunk file.
                                         final String chunkToFileName = cf.getOriginalname().substring(0, cf.getOriginalname().length() - 10);
                                         // Go through each file.
                                         for (PSFile file : files) {
-
                                             // Only do work if the correct file is found
                                             if (file.getFileName().equals(chunkToFileName)) {
                                                 actualFile = file;
@@ -411,7 +405,6 @@ public class HomeController extends FragmentActivity implements Serializable {
                     }
                 }
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
@@ -426,9 +419,7 @@ public class HomeController extends FragmentActivity implements Serializable {
             User u = users.get(0);
             System.out.println("User To Recieve: " + u.getUsername() + "  User ID: " + u.getUserID());
             ChunkLink link = new ChunkLink(u.getUserID(), file.getFile().getName(), originalFileName, fileID_link);
-
             System.out.println("TESTING:    Name: " + link.getFileName() + "    "  + file.getOriginalname() +  "    " + originalFileName);
-
             DatabaseReference ref = UserManager.userDatabaseReference.getParent();
             ref.child("chunks").child(originID).child(fileID_link).push().setValue(link);
         }
@@ -438,9 +429,9 @@ public class HomeController extends FragmentActivity implements Serializable {
     protected void onStop() {
         System.out.println("App Closed Down, Upload Chunks!");
 
+        //TODO: make this work correctly! It does work at the moment, but need to be better before deploy.
         if (chunkDownloaderThread.isAlive() == false && !isUpload) {
-            System.out.println("MOVE CHUNKS");
-            moveChunksToOtherDevices();
+            //moveChunksToOtherDevices();
         }
 
         if(profileActivity.created){
@@ -459,7 +450,6 @@ public class HomeController extends FragmentActivity implements Serializable {
         this.overridePendingTransition(R.anim.push_down_in, R.anim.push_down_out);
         UserManager.loggedIn = true;
     }
-
 
 
     @Override
